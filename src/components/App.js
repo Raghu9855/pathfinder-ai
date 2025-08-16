@@ -9,22 +9,27 @@ function App() {
   
   const[isLoading,setisLoading]=useState(false);
   const[roadmap,setroadmap]=useState(null);
-  const handleSearch=(topic)=>{
+  const handleSearch=async (topic)=>{
       setisLoading(true);
       setroadmap(null);
-      const timeout = setTimeout(() => {
-        const mockData = {
-        title: 'Learn Guitar',
-    weeks: [
-      { week: 1, topic: 'The Basics: Anatomy of the Guitar & Basic Chords' },
-      { week: 2, topic: 'Strumming Patterns & Transitions' },
-      { week: 3, topic: 'Learning Your First Song' }
-    ]
-    };
-        setroadmap(mockData);
+      const url='http://localhost:5001/api/roadmap';
+      try {
+        const response=await fetch(url,{
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json'
+          },
+          body:JSON.stringify({ topic })
+        });
+          const Data=await response.json();
+          setroadmap(Data.roadmap);
+      } catch (error) {
+        console.error("Error fetching roadmap:", error);
+      }finally{
         setisLoading(false);
-        clearTimeout(timeout);
-      }, 2000);
+      }
+      
+      
     }
 
   return (
