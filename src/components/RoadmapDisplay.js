@@ -1,4 +1,4 @@
-import ReactMarkdown from 'react-markdown';
+
 
 function RoadmapDisplay({roadmap}) {
   if (!roadmap) {
@@ -6,7 +6,17 @@ function RoadmapDisplay({roadmap}) {
   }else{
     return (
       <div className="roadmap-content">
-      <ReactMarkdown>{roadmap}</ReactMarkdown>
+      <h2>{roadmap.title}</h2>
+      {roadmap.weeks.map((week, index) => (
+        <div key={index} className="week-section">
+          <h3>Week {week.week}: {week.focus}</h3>
+          <ul>
+            {week.concepts.map((concept, conceptIndex) => (
+              <li key={conceptIndex}>{concept}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
       </div>
     );
   }
