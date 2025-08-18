@@ -1,48 +1,22 @@
-
+import React from "react";
 import './App.css';
-import SearchInput from './SearchInput';
-import RoadmapDisplay from './RoadmapDisplay';
-import React,{useState} from 'react';
+import {BrowserRouter,Routes,Route} from 'react-router-dom';
+import Navbar from '../pages/Navbar';
+import RegisterPage from "../pages/RegisterPage";
+import LoginPage from "../pages/LoginPage";
+import HomePage from "../pages/HomePage"; 
 
-
-function App() {
-  
-  const[isLoading,setisLoading]=useState(false);
-  const[roadmap,setroadmap]=useState(null);
-  const handleSearch=async (topic)=>{
-      setisLoading(true);
-      setroadmap(null);
-      const url='http://localhost:5001/api/roadmap';
-      try {
-        const response=await fetch(url,{
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json'
-          },
-          body:JSON.stringify({ topic })
-        });
-          const Data=await response.json();
-          setroadmap(Data.roadmap);
-      } catch (error) {
-        console.error("Error fetching roadmap:", error);
-      }finally{
-        setisLoading(false);
-      }
-      
-      
-    }
-
-  return (
-    <div className="app-container">
-      <h1>PathFinder AI</h1>
-      <SearchInput onSearch={handleSearch} />
-      <div>
-        {(isLoading)?<p>Generating Path.....</p>:(roadmap)?<RoadmapDisplay roadmap={roadmap} />:null}
-      </div>
-    </div>
+function App()  {
+  return(
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-
 
 export default App;

@@ -1,15 +1,14 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import Roadmap from '../models/roadmap.js';
+import { configDotenv } from 'dotenv';
 
+configDotenv(); // Load environment variables from .env file
 
-if (!process.env.GEMINI_API_KEY) {
-  throw new Error("GEMINI_API_KEY is not set. Please create a new .env file with your working key.");
-}
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 
 // --- API Route for Generating a Roadmap ---
-const generateRoadmap = async (req, res) => {
+export const generateRoadmap = async (req, res) => {
     const { topic } = req.body;
 
     // Basic validation to ensure a topic was provided
@@ -68,4 +67,3 @@ const generateRoadmap = async (req, res) => {
     }
 };
 
-export default generateRoadmap;
