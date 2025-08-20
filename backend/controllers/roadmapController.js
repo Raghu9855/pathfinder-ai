@@ -67,13 +67,21 @@ export const generateRoadmap = async (req, res) => {
     }
 };
 
-export const getUserRoadmaps = async (req, res) => {
-  try {
-    const roadmaps = await Roadmap.find({ user: req.user._id }).sort({ createdAt: -1 });
-    res.json(roadmaps);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching roadmaps" });
-  }
-};
 
+// --- API Route for Fetching a User's Saved Roadmaps ---
+export const getUserRoadmaps = async (req, res) => {
+    try {
+        // 1. The user's ID is attached to the request by the 'protect' middleware.
+        const userId = req.user._id;
+
+        // 2. Find all roadmaps in the database where the 'user' field matches the logged-in user's ID.
+        const roadmaps = await Roadmap.find({ user: userId });
+
+        // 3. Send the found roadmaps back to the client.
+        res.status(200).json(roadmaps);
+
+    } catch (error) {
+        console.error("Error fetching user roadmaps:", error);
+        res.status(500).json({ message: "Server error while fetching roadmaps" });
+    }
+};

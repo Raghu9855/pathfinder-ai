@@ -5,6 +5,6 @@ import {generateRoadmap,getUserRoadmaps} from "../controllers/roadmapController.
 const router = express.Router();
 
 router.post("/roadmap", protect, generateRoadmap);
-router.get("/", protect, getUserRoadmaps); 
+router.get("/roadmaps", protect, getUserRoadmaps);
 
 export default router;

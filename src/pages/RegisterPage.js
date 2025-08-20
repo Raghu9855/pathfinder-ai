@@ -1,11 +1,13 @@
-import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; 
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 const RegisterPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate(); 
+  const { login } = useContext(AuthContext); 
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -22,7 +24,7 @@ const RegisterPage = () => {
           if (response.ok) {
                 localStorage.setItem("token", Data.token);
                 navigate("/");
-
+                login(Data.user);
             }else{
                 alert(Data.message || "Registration failed");
             }
