@@ -54,7 +54,7 @@ export const generateRoadmap = async (req, res) => {
         const jsonData = JSON.parse(text);
         
         // This is a conceptual example
-        await Roadmap.create({ topic: topic, roadmap: jsonData });
+        await Roadmap.create({ user: req.user._id , topic: topic, roadmap: jsonData,});
 
         // Send the structured JSON back to the client
         res.json(jsonData);
@@ -65,5 +65,15 @@ export const generateRoadmap = async (req, res) => {
         // Send a generic error message to the client
         return res.status(500).json({ error: "Failed to generate roadmap" });
     }
+};
+
+export const getUserRoadmaps = async (req, res) => {
+  try {
+    const roadmaps = await Roadmap.find({ user: req.user._id }).sort({ createdAt: -1 });
+    res.json(roadmaps);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching roadmaps" });
+  }
 };
 

@@ -8,6 +8,11 @@ function App() {
   const[isLoading,setisLoading]=useState(false);
   const[roadmap,setroadmap]=useState(null);
   const handleSearch=async (topic)=>{
+    const token = localStorage.getItem('token');
+      if(!token){
+        alert("You must be logged in to generate a roadmap.");
+        return;
+      }
       setisLoading(true);
       setroadmap(null);
       const url='http://localhost:5001/api/roadmap';
@@ -15,9 +20,10 @@ function App() {
         const response=await fetch(url,{
           method:'POST',
           headers:{
-            'Content-Type':'application/json'
+            'Content-Type':'application/json',
+            Authorization: `Bearer ${token}`,
           },
-          body:JSON.stringify({ topic })
+          body:JSON.stringify({ topic: topic })
         });
           const Data=await response.json();
           setroadmap(Data.roadmap);

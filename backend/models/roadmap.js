@@ -8,6 +8,11 @@ const roadmapSchema=new mongoose.Schema({
     roadmap:{
         type:Object,
         required:true
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId, 
+        required: true,
+        ref: 'User'
     }
 }, {
     timestamps: true
