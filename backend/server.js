@@ -21,7 +21,7 @@ if (!process.env.GEMINI_API_KEY) {
 
 
 app.use("/api/users", userRoutes);
-app.use("/api", roadmapRoutes);
+app.use("/api/", roadmapRoutes);
 
 
 // --- Start the Server ---

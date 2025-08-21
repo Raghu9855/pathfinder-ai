@@ -85,3 +85,26 @@ export const getUserRoadmaps = async (req, res) => {
         res.status(500).json({ message: "Server error while fetching roadmaps" });
     }
 };
+
+
+export const deleteRoadmap = async (req, res) => {
+  try {
+    const roadmap = await Roadmap.findById(req.params.id);
+
+    if (!roadmap) {
+      return res.status(404).json({ message: 'Roadmap not found' });
+    }
+
+    if (roadmap.user.toString() !== req.user.id) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+
+    await roadmap.deleteOne();
+
+    res.status(200).json({ message: 'Roadmap deleted successfully', id: req.params.id });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};

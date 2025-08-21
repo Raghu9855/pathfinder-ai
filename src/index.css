@@ -11,3 +11,18 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+.roadmap-date {
+  color: var(--secondary-text-color); /* Lighter grey for secondary info */
+  font-size: 0.85em;                /* Slightly smaller font size */
+  margin-left: 15px;                /* Space it away from the topic */
+  font-style: italic;               /* Adds a nice, subtle touch */
+  white-space: nowrap;              /* Prevents the date from wrapping */
+}
+
+/* Helper class to group the topic and date together */
+.roadmap-info {
+  display: flex;
+  align-items: center;
+}

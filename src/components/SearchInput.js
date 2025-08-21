@@ -10,7 +10,7 @@ function SearchInput({onSearch}) {
   return (
     <form onSubmit={handleSubmit}>
         <input onChange={(e) => setTopic(e.target.value)} type="text" placeholder="Search..." value={topic} />
-        <button>Generate Path</button>
+        <button>Map</button>
         
     </form>
   );

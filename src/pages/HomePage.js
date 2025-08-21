@@ -32,8 +32,13 @@ function HomePage() {
       }
     };
 
-    if (user) fetchMyRoadmaps();
-  }, [user, roadmap]); // re-fetch on login + new roadmap
+    if (user) {
+      fetchMyRoadmaps();
+    } else {
+      setMyRoadmaps([]);
+      setRoadmap(null);
+    }
+  }, [user]); // re-fetch on login + new roadmap
 
   // Generate a new roadmap
   const handleSearch = async (topic) => {
@@ -65,6 +70,43 @@ function HomePage() {
     }
   };
 
+// Inside your HomePage component
+
+const handleDelete = async (roadmapId) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("You must be logged in to delete a roadmap.");
+    return;
+  }
+
+  // Optional: Ask for confirmation before deleting
+  if (!window.confirm("Are you sure you want to delete this roadmap?")) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`http://localhost:5001/api/roadmaps/${roadmapId}`, {
+      method: 'DELETE', // Use the DELETE HTTP method
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete the roadmap.');
+    }
+
+    // If successful, remove the roadmap from the local state
+    setMyRoadmaps(prevRoadmaps => 
+      prevRoadmaps.filter(roadmap => roadmap._id !== roadmapId)
+    );
+
+  } catch (error) {
+    console.error("Error deleting roadmap:", error);
+    // Optionally, set an error state to show a message to the user
+  }
+};
+
   return (
     <div className="app-container">
       <h1>PathFinder AI</h1>
@@ -77,21 +119,39 @@ function HomePage() {
         ) : null}
       </div>
 
-      <div className="my-roadmaps">
-        <h2>My Roadmaps</h2>
-        {myRoadmaps.length === 0 ? (
-          <p>No roadmaps saved yet.</p>
-        ) : (
-         <ul>
-            {myRoadmaps.map((roadmap) => (
-              // Add roadmap.topic inside the li tag to display it
-              <li key={roadmap._id}>{roadmap.topic}</li>
-            ))}
-          </ul>
-        )}
-      </div>
+    <div className="my-roadmaps-list">
+      <h2>My Roadmaps</h2>
+      {myRoadmaps.length === 0 ? (
+        <p>No roadmaps saved yet.</p>
+      ) : (
+        <ul>
+          {myRoadmaps.map((savedRoadmap) => (
+            <li key={savedRoadmap._id} className="roadmap-item">
+              
+              {/* Button to view the roadmap */}
+              <button onClick={() => setRoadmap(savedRoadmap.roadmap.roadmap)}>
+                {savedRoadmap.topic}
+              </button>
+              <span className="roadmap-date">{new Date(savedRoadmap.createdAt).toLocaleDateString()}</span>
+              {/* Button to delete the roadmap */}
+              <button 
+                onClick={() => handleDelete(savedRoadmap._id)} 
+                style={{ marginLeft: '10px', backgroundColor: '#ff4d4d', color: 'white' }}
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
-  );
+  </div>
+);
+
 }
 
+
+
 export default HomePage;
+
+
