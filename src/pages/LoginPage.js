@@ -11,7 +11,7 @@ const LoginPage = () => {
 
     const handleLogin = async (e) => {
     e.preventDefault();
-    const url='http://localhost:5001/api/users/login';
+    const url=`${process.env.REACT_APP_API_URL}/api/users/login`;
     try {
         const response=await fetch(url,{
           method:'POST',

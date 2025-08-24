@@ -16,7 +16,7 @@ function HomePage() {
       if (!token) return;
 
       try {
-        const response = await fetch("http://localhost:5001/api/roadmaps", {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/roadmaps`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -52,7 +52,7 @@ function HomePage() {
     setRoadmap(null);
 
     try {
-      const response = await fetch('http://localhost:5001/api/roadmap', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/roadmap`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ const handleDelete = async (roadmapId) => {
   }
 
   try {
-    const response = await fetch(`http://localhost:5001/api/roadmaps/${roadmapId}`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/roadmaps/${roadmapId}`, {
       method: 'DELETE', // Use the DELETE HTTP method
       headers: {
         'Authorization': `Bearer ${token}`

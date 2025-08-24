@@ -12,7 +12,7 @@ const RegisterPage = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const url='http://localhost:5001/api/users/register';
+    const url=`${process.env.REACT_APP_API_URL}/api/users/register`;
     try {
         const response=await fetch(url,{
           method:'POST',
