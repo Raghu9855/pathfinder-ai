@@ -6,6 +6,25 @@ configDotenv(); // Load environment variables from .env file
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+function extractJSON(text) {
+  text = text.replace(/```json|```/g, '').trim(); // Remove backticks
+
+  try {
+    return JSON.parse(text); // Try parsing directly
+  } catch (err) {
+    // Try to extract first JSON object if extra text exists
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        return JSON.parse(match[0]);
+      } catch (err2) {
+        return null;
+      }
+    }
+    return null;
+  }
+}
+
 
 // --- API Route for Generating a Roadmap ---
 export const generateRoadmap = async (req, res) => {
@@ -18,7 +37,7 @@ export const generateRoadmap = async (req, res) => {
 
     try {
         // 1. Use the model that we confirmed is working from the test script.
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         // 2. Craft the prompt
         const prompt = `
@@ -47,11 +66,12 @@ export const generateRoadmap = async (req, res) => {
           }`;
         // 3. Generate content
         const result = await model.generateContent(prompt);
-        const response = await result.response;
+        const response = result.response;
         
         // 4. Extract the text from the response
+        
         const text = response.text();
-        const jsonData = JSON.parse(text);
+        const jsonData = extractJSON(text);
         
         // This is a conceptual example
         await Roadmap.create({ user: req.user._id , topic: topic, roadmap: jsonData,});
