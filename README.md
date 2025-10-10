@@ -168,4 +168,4 @@ The project is deployed and live on the web at the following addresses:
 
 ## ✒️ Author
 
-**Raghavendra K** - [GitHub](https://www.google.com/search?q=https://github.com/Raghu9855) - [LinkedIn](https://www.google.com/search?q=https://www.linkedin.com/in/raghk)
+**Raghavendra K** - [GitHub]([https://www.google.com/search?q=https://github.com/Raghu9855](https://github.com/Raghu9855)) - [LinkedIn](www.linkedin.com/in/raghk)
