@@ -2,15 +2,16 @@
 
 /* --- 1. Global Styles & roadmap.sh Theme Variables --- */
 :root {
-  --background-color: #121212; /* Dark Charcoal */
-  --card-background: #1e1e1e;   /* Slightly Lighter Grey */
-  --accent-color: #5a3de0;      /* Signature Purple */
-  --text-color: #eaeaea;        /* Light Grey Text */
-  --secondary-text-color: #a0a0a0;
-  --border-color: #333333;
+  --background-color: #f4f7f9;
+  --card-background: #ffffff;
+  --accent-color: #3498db;      /* Blue for light theme */
+  --text-color: #2c3e50;        /* Dark Slate text */
+  --secondary-text-color: #7f8c8d;
+  --border-color: #e1e8ed;
+  --date-text-color: #95a5a6;
+  --delete-color: #e74c3c;
   --border-radius: 8px;
-  --main-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --date-text-color: #bda55d; /* A subtle, muted gold */
+  --main-font: 'Inter', sans-serif;
 }
 
 body {
@@ -22,6 +23,40 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Dark Theme Overrides */
+body[data-theme='dark'] {
+  --background-color: #121212;
+  --card-background: #1e1e1e;
+  --accent-color: #5a3de0;      /* Purple for dark theme */
+  --text-color: #eaeaea;
+  --secondary-text-color: #a0a0a0;
+  --border-color: #333333;
+  --date-text-color: #bda55d;
+}
+
+.theme-toggle-button {
+  /* --- Set Equal Dimensions for a Perfect Circle --- */
+  width: 40px;
+  height: 40px;
+  border-radius: 50%; /* This will now create a perfect circle */
+
+  /* --- Center the Icon Inside --- */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  /* --- Other Styles --- */
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 0; /* Remove default padding */
+  flex-shrink: 0; /* Prevents the button from being squished */
+}
+.theme-toggle-button svg {
+  width: 22px;
+  height: 22px;
+}
 * {
   box-sizing: border-box;
 }
@@ -102,7 +137,8 @@ form {
 /* Input field styles */
 input[type="text"],
 input[type="email"],
-input[type="password"] { /* <-- Corrected typo here */
+input[type="password"],
+input[type="number"] {
   width: 100%;
   padding: 12px;
   background-color: var(--background-color);
@@ -112,6 +148,41 @@ input[type="password"] { /* <-- Corrected typo here */
   font-size: 16px;
   font-family: var(--main-font);
   transition: border-color 0.3s, box-shadow 0.3s;
+}
+/* Update the search form to better handle multiple inputs */
+.search-form {
+  display: flex;
+  flex-direction: column; /* Stacks items vertically */
+  gap: 15px;
+  margin: 30px 0;
+  padding: 20px;
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+/* Add a class for the main topic input to make it flexible */
+.topic-input {
+  flex-grow: 1; /* Allows this input to take up the available space */
+  min-width: 200px; /* Ensures it has a reasonable minimum width */
+}
+
+/* Add a class for the week input to make it smaller */
+.week-input {
+  width: 100px; /* A fixed, smaller width */
+}
+/* --- Hide Number Input Arrows --- */
+
+/* For Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* For Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 input:focus {
@@ -355,3 +426,4 @@ button:hover {
 .logout-button:hover {
   background-color: #492eb1; /* Darker accent color */
 }
+

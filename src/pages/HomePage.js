@@ -41,7 +41,7 @@ function HomePage() {
   }, [user]); // re-fetch on login + new roadmap
 
   // Generate a new roadmap
-  const handleSearch = async (topic) => {
+  const handleSearch = async (topic, week) => {
     const token = localStorage.getItem('token');
     if (!token) {
       alert("You must be logged in to generate a roadmap.");
@@ -58,17 +58,24 @@ function HomePage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ topic }),
+        body: JSON.stringify({ topic, week }),
       });
 
       const data = await response.json();
-      setRoadmap(data.roadmap); 
+      if (!response.ok) {
+        // Use the error message from the backend in the alert
+        alert(data.error);
+        // Stop the function here
+        return;
+      }
+      setRoadmap(data.roadmap); setMyRoadmaps(prevRoadmaps => [data, ...prevRoadmaps]);
     } catch (error) {
       console.error("Error fetching roadmap:", error);
     } finally {
       setIsLoading(false);
     }
   };
+
 
 // Inside your HomePage component
 
@@ -129,7 +136,7 @@ const handleDelete = async (roadmapId) => {
             <li key={savedRoadmap._id} className="roadmap-item">
               
               {/* Button to view the roadmap */}
-              <button onClick={() => setRoadmap(savedRoadmap.roadmap.roadmap)}>
+              <button onClick={() => setRoadmap(savedRoadmap.roadmap)}>
                 {savedRoadmap.topic}
               </button>
               <span className="roadmap-date">{new Date(savedRoadmap.createdAt).toLocaleDateString()}</span>

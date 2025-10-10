@@ -28,28 +28,39 @@ function extractJSON(text) {
 
 // --- API Route for Generating a Roadmap ---
 export const generateRoadmap = async (req, res) => {
-    const { topic } = req.body;
+    const { topic , week} = req.body;
 
     // Basic validation to ensure a topic was provided
-    if (!topic) {
-        return res.status(400).json({ error: "The 'topic' field is required." });
+    if (!topic || (week <= 0 && week > 52)) {
+        return res.status(400).json({ error: "The 'topic' field is required and 'week' must be a positive number." });
     }
 
     try {
         // 1. Use the model that we confirmed is working from the test script.
         const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const validationPrompt = `Is the topic '${topic}' a technical skill, a scientific concept, an academic subject, or a professional field that can have a structured learning roadmap? Personal names, fictional characters, or general places are not valid topics for this purpose. Please answer with only the word "yes" or "no".`;
+        // Corrected validation logic
+        const validationResult = await model.generateContent(validationPrompt);
+        const validationResponse = await validationResult.response;
+        const validationText = await validationResponse.text();
 
+        if (validationText.toLowerCase().trim().includes("no")) {
+            return res.status(400).json({ error: "The provided topic is not valid..." });
+        }
+                
         // 2. Craft the prompt
         const prompt = `
-          Create a detailed, 4-week learning roadmap for a beginner on the topic of '${topic}'.
+          Create a detailed, ${week}-week learning roadmap for a beginner on the topic of '${topic}'.
+          IMPORTANT: If the topic '${topic}' is a person's name, a place, or a concept for which a technical or academic learning roadmap is not possible, your entire response MUST be a JSON object with a single key "error" and a value of "A learning roadmap cannot be created for this topic."
           Your response MUST be a valid JSON object. Do not include any text or markdown formatting before or after the JSON.
           The JSON object should have a single key "roadmap" which is an object containing a "title" and a "weeks" array.
+          The "weeks" array MUST contain exactly ${week} object(s). For short durations like 1 or 2 weeks, you MUST consolidate the most important concepts into a single, cohesive plan for each week. Do not create multiple "Week 1" sections.
           Each object in the "weeks" array should have a "week" number, a "focus" string, and a "concepts" array of strings.
 
           Example format:
           {
             "roadmap": {
-              "title": "4-Week Beginner's Roadmap to ${topic}",
+              "title": "${week}-Week Beginner's Roadmap to ${topic}",
               "weeks": [
                 {
                   "week": 1,
@@ -73,11 +84,11 @@ export const generateRoadmap = async (req, res) => {
         const text = response.text();
         const jsonData = extractJSON(text);
         
-        // This is a conceptual example
-        await Roadmap.create({ user: req.user._id , topic: topic, roadmap: jsonData,});
+       // This is a conceptual example
+        const newRoadmap = await Roadmap.create({ user: req.user._id , topic: topic, roadmap: jsonData.roadmap,});
 
-        // Send the structured JSON back to the client
-        res.json(jsonData);
+        // Send the NEWLY SAVED document back to the client
+        res.status(201).json(newRoadmap);
 
     } catch (error) {
         // Log the full error for debugging on the server
@@ -95,10 +106,11 @@ export const getUserRoadmaps = async (req, res) => {
         const userId = req.user._id;
 
         // 2. Find all roadmaps in the database where the 'user' field matches the logged-in user's ID.
-        const roadmaps = await Roadmap.find({ user: userId });
+        const roadmaps = await Roadmap.find({ user: userId }).sort({ createdAt: -1 });
 
         // 3. Send the found roadmaps back to the client.
         res.status(200).json(roadmaps);
+        
 
     } catch (error) {
         console.error("Error fetching user roadmaps:", error);

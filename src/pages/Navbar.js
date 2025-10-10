@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext'; // Check your path
+import ThemeToggle from '../components/ThemeToggle';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -18,6 +19,7 @@ const Navbar = () => {
       </div>
 
       <div className="navbar-links">
+        <ThemeToggle />
         {user ? (
           // If user is logged in, show this:
           <div className="user-info">
