@@ -1,15 +1,16 @@
 # PathFinder AI
 
-Frontend (Vercel): https://pathfinder-ai-ten.vercel.app
+**Frontend (Vercel):** [https://pathfinder-ai-ten.vercel.app](https://pathfinder-ai-ten.vercel.app)
 
-Backend (Render): https://pathfinder-ai-backend.onrender.com
+**Backend (Render):** [https://pathfinder-ai-backend.onrender.com](https://pathfinder-ai-backend.onrender.com)
 
-GitHub Repo: https://github.com/Raghu9855/pathfinder-ai
+**GitHub Repo:** [https://github.com/Raghu9855/pathfinder-ai](https://github.com/Raghu9855/pathfinder-ai)
+
 -----
 
 ## 💡 Project Overview
 
-This project is a full-stack web application called PathFinder AI, designed to help users generate and manage personalized learning roadmaps. Leveraging the power of generative AI, the application creates structured, week-by-week learning plans on any topic, which are then saved to a user's account for future reference. The entire application is built with a **MERN (MongoDB, Express, React, Node.js)** stack, demonstrating a comprehensive set of modern web development skills.
+This project is a full-stack web application called **PathFinder AI**, designed to help users generate and manage personalized learning roadmaps. Leveraging the power of generative AI, the application creates structured, week-by-week learning plans on any topic, which are then saved to a user's account for future reference. The entire application is built with a **MERN (MongoDB, Express, React, Node.js)** stack, demonstrating a comprehensive set of modern web development skills.
 
 -----
 
@@ -18,8 +19,9 @@ This project is a full-stack web application called PathFinder AI, designed to h
   * **User Authentication:** A secure and robust account system that allows users to register, log in, and log out. It uses **JSON Web Tokens (JWT)** for session management and **bcrypt** to securely hash all user passwords.
   * **AI-Powered Generation:** The core functionality, powered by the **Google Gemini API**, generates detailed, customizable learning roadmaps on a wide range of topics.
   * **Persistent Data Storage:** All generated roadmaps are stored in a **MongoDB** database, linked directly to the user's account. This ensures data is persistent and can be accessed across sessions.
-  * **Personalized Dashboard:** A private dashboard for logged-in users to view and manage their previously saved roadmaps, creating a personalized learning library.
+  * **Personalized Dashboard:** A private dashboard for logged-in users to view, manage, and delete their previously saved roadmaps, creating a personalized learning library.
   * **Responsive Design:** The user interface is built to be clean, modern, and fully responsive, providing a seamless experience on both desktop and mobile devices.
+  * **Theme Toggler:** The application includes a theme toggler that allows users to switch between light and dark modes for a comfortable viewing experience.
 
 -----
 
@@ -29,12 +31,16 @@ This project is a full-stack web application called PathFinder AI, designed to h
 
   * **React:** For building a dynamic and responsive user interface.
   * **React Router:** For client-side navigation and routing within the application.
-  * **React Context:** To manage the global user authentication state, avoiding "prop drilling."
+  * **React Context:** To manage the global user authentication and theme state, avoiding "prop drilling."
+  * **React Markdown:** To render the generated roadmaps from Markdown to HTML.
+  * **React Icons:** For including icons in the user interface.
 
 ### Backend
 
   * **Node.js & Express.js:** To build a high-performance RESTful API that handles all business logic.
   * **MongoDB & Mongoose:** A NoSQL database and an Object Data Modeling (ODM) library for reliable data storage and retrieval.
+  * **JSON Web Tokens (JWT):** For secure session management.
+  * **bcrypt.js:** For securely hashing user passwords.
 
 ### External APIs
 
@@ -50,21 +56,24 @@ This project is a full-stack web application called PathFinder AI, designed to h
 
 ## 📂 Project File Structure
 
-The project is organized with a clear separation of frontend and backend concerns, following modern development practices.
-
 ```
 pathfinder-ai/
-├── backend/                // My Node.js/Express.js backend
+├── backend/                // Node.js/Express.js backend
+│   ├── config/             // Database configuration
+│   ├── controllers/        // Application logic for handling requests
+│   ├── middleware/         // Authentication middleware
+│   ├── models/             // Mongoose schemas for User and Roadmap
 │   ├── routes/             // API route definitions
 │   ├── .env                // Backend environment variables
-│   ├── package.json        
+│   ├── package.json
 │   └── server.js           // The main backend server file
-├── node_modules/           // Frontend dependencies
-├── public/                 // Static assets (index.html)
-├── src/                    // My main React source code
-│   ├── components/         // Reusable React components (Navbar, etc.)
-│   ├── context/            // Global state for user authentication
-│   ├── pages/              // Main page components
+├── public/                 // Static assets (index.html, favicon, etc.)
+├── src/                    // React source code
+│   ├── components/         // Reusable React components
+│   ├── context/            // Global state for Authentication and Theme
+│   ├── pages/              // Main page components (Home, Login, Register)
+│   ├── App.css
+│   ├── App.js              // Main application component with routing
 │   ├── index.css
 │   └── index.js            // App entry point
 ├── .env.local              // Frontend environment variables
@@ -142,8 +151,9 @@ The backend API provides the following endpoints:
 
   * `POST /api/users/register`: Register a new user.
   * `POST /api/users/login`: Authenticate and log in a user.
-  * `POST /api/roadmaps`: Create a new roadmap (protected route).
-  * `GET /api/roadmaps/myroadmaps`: Get all roadmaps for the logged-in user (protected route).
+  * `POST /api/roadmap`: Create a new roadmap (protected route).
+  * `GET /api/roadmaps`: Get all roadmaps for the logged-in user (protected route).
+  * `DELETE /api/roadmaps/:id`: Delete a specific roadmap for the logged-in user (protected route).
 
 -----
 
@@ -151,11 +161,11 @@ The backend API provides the following endpoints:
 
 The project is deployed and live on the web at the following addresses:
 
-  * **Frontend:** `[https://pathfinder-ai-ten.vercel.app]`
-  * **Backend API:** `[https://pathfinder-ai-backend.onrender.com]`
+  * **Frontend:** `https://pathfinder-ai-ten.vercel.app`
+  * **Backend API:** `https://pathfinder-ai-backend.onrender.com`
 
 -----
 
 ## ✒️ Author
 
-**Raghavendra K** - [GitHub](https://www.google.com/search?q=https://github.com/Raghu9855) - [LinkedIn](www.linkedin.com/in/raghk)
+**Raghavendra K** - [GitHub](https://www.google.com/search?q=https://github.com/Raghu9855) - [LinkedIn](https://www.google.com/search?q=https://www.linkedin.com/in/raghk)
