@@ -3,6 +3,17 @@ import RoadmapDisplay from '../components/RoadmapDisplay';
 import React,{useState,useEffect,useContext} from 'react';
 import {AuthContext} from "../context/AuthContext";
 
+const Loader = () => (
+  <div className="loader-container">
+    <div className="loader-dots">
+      <span className="dot"></span>
+      <span className="dot"></span>
+      <span className="dot"></span>
+    </div>
+    <p className="loader-text">Generating your path...</p>
+  </div>
+);
+
 function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [roadmap, setRoadmap] = useState(null);
@@ -120,7 +131,7 @@ const handleDelete = async (roadmapId) => {
       <SearchInput onSearch={handleSearch} />
       <div>
         {isLoading ? (
-          <p>Generating Path.....</p>
+          <Loader />
         ) : roadmap ? (
           <RoadmapDisplay roadmap={roadmap} />
         ) : null}

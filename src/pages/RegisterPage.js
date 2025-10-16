@@ -1,47 +1,54 @@
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate, Link } from "react-router-dom";
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { Link } from "react-router-dom";
 
 const RegisterPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); 
-  const { login } = useContext(AuthContext); 
+  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const url=`${process.env.REACT_APP_API_URL}/api/users/register`;
+    const url = `${process.env.REACT_APP_API_URL}/api/users/register`;
     try {
-        const response=await fetch(url,{
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json'
-          },
-          body:JSON.stringify({ name, email, password })
-        });
-          const Data=await response.json();
-          if (response.ok) {
-                localStorage.setItem("token", Data.token);
-                navigate("/");
-                login(Data.user);
-            }else{
-                alert(Data.message || "Registration failed");
-            }
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Something went wrong. Try again.");
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const Data = await response.json();
+      if (response.ok) {
+        localStorage.setItem("token", Data.token);
+        login(Data.user);
+        navigate("/");
+      } else {
+        alert(Data.message || "Registration failed");
       }
-
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Something went wrong. Try again.");
+    }
   };
 
   return (
     <div className="auth-page-wrapper">
+      {/* --- Creative Introduction Section --- */}
+      <div className="intro-container">
+        <div className="intro-logo">PathFinder AI</div>
+        <h1>Unlock Your Learning Potential.</h1>
+        <p>
+          Generate AI-powered roadmaps for any skill, from coding to cooking. Your personalized learning journey starts here.
+        </p>
+      </div>
+
+      {/* --- Registration Form Section --- */}
       <div className="auth-form-container">
-        <h2>Register</h2>
+        <h2>Create Your Account</h2>
         <form className="auth-form" onSubmit={handleRegister}>
-          
           <div className="form-group">
             <label htmlFor="name">Name</label>
             <input
@@ -53,7 +60,6 @@ const RegisterPage = () => {
               required
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -65,7 +71,6 @@ const RegisterPage = () => {
               required
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="password">Password</label>
             <input
@@ -77,7 +82,6 @@ const RegisterPage = () => {
               required
             />
           </div>
-
           <button type="submit">Register</button>
         </form>
         <p className="auth-switch-link">

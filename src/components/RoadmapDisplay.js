@@ -1,4 +1,5 @@
 import React from "react";
+import ChatMentor from './ChatMentor'; 
 
 function RoadmapDisplay({ roadmap }) {
   console.log(roadmap);
@@ -24,6 +25,7 @@ function RoadmapDisplay({ roadmap }) {
 
       ))}
       </div>
+      <ChatMentor roadmap={roadmap} />
     </div>
   );
 }

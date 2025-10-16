@@ -31,8 +31,8 @@ export const generateRoadmap = async (req, res) => {
     const { topic , week} = req.body;
 
     // Basic validation to ensure a topic was provided
-    if (!topic || (week <= 0 && week > 52)) {
-        return res.status(400).json({ error: "The 'topic' field is required and 'week' must be a positive number." });
+    if (!topic || (week <= 0 || week > 52)) {
+        return res.status(400).json({ error: "The 'topic' field is required and 'week' must be a positive number between 1 and 52." });
     }
 
     try {
@@ -138,5 +138,83 @@ export const deleteRoadmap = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+
+export const chatWithMentor = async (req, res) => {
+  const { userQuestion, chatHistory, roadmap } = req.body;
+
+  if (!userQuestion || !roadmap || !roadmap.title) {
+    return res.status(400).json({ error: "A question and a valid roadmap are required." });
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+   const prompt = `
+    You are "PathFinder," an intelligent AI learning mentor designed to guide users through personalized learning journeys. 
+    Your goal is to provide clear, structured, and actionable guidance in a natural, conversational way while maintaining professional clarity.
+
+    **CONTEXT:**
+    - User's Roadmap Topic: "${roadmap.title}"
+    - Full Learning Plan: ${JSON.stringify(roadmap.weeks)}
+    - Conversation History: ${JSON.stringify(chatHistory)}
+    - User's Latest Question: "${userQuestion}"
+
+    **YOUR ROLE:**
+    Based on the user's question and the context, deliver the next logical, focused step in their learning process. 
+    Adapt your tone to be encouraging, supportive, and clear — like a real mentor helping a motivated learner.
+
+    **GUIDELINES FOR YOUR RESPONSE:**
+    1. **One Step at a Time:**  
+      Always respond with the next meaningful step. Avoid overwhelming users — guide them gradually.
+      - If the user says "next", "continue", "done", "ok", etc., move to the **next logical step**.  
+      - If they ask a new question, start a **fresh step sequence** relevant to that topic.
+
+    2. **Real-World Focus:**  
+      Include practical context — mention tools, examples, or real scenarios where applicable.  
+      Make the advice feel like something a developer or learner would do in real life.
+
+    3. **Formatting for Clarity (Markdown Rules):**
+      - Start every response directly with the step (e.g., **Step 1: Set Up Your Environment**)  
+      - Use **bold** for key actions, terms, and concepts.  
+      - Use *bullets* for subpoints or options.  
+      - Use \`inline code\` for commands, filenames, or keywords.  
+      - Use \`\`\`code blocks\`\`\` for larger code examples or configs.
+
+    4. **Be Concise and Action-Oriented:**  
+      Each step should be short, clear, and directly actionable. Avoid repeating context unless needed.
+
+    5. **End with Engagement:**  
+      Always end your response by prompting user interaction — e.g.,  
+      “✅ Let me know when you’ve completed this step or if you’d like a deeper explanation.”
+
+    6. **Stay Relevant:**  
+      If the question is outside the user’s learning roadmap, politely redirect them:  
+      “I can only guide you on topics related to your current learning roadmap.”
+
+    Your responses should feel structured, yet adaptive — as if a knowledgeable mentor is guiding the learner through a real-world project or course.
+    `;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = await response.text();
+
+    // Basic check for the special JSON response
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed.action === 'suggest_change') {
+        return res.status(200).json({ response: parsed.suggestion });
+      }
+    } catch (e) {
+      // Not a JSON response, so treat as plain text
+    }
+
+    res.status(200).json({ response: text });
+
+  } catch (error) {
+    console.error("Error in mentor chat:", error);
+    res.status(500).json({ error: "Failed to get a response from the mentor." });
   }
 };

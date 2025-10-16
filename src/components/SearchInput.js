@@ -11,7 +11,7 @@ function SearchInput({onSearch}) {
   return (
     <form className="search-form" onSubmit={handleSubmit}>
         <input className="topic-input" onChange={(e) => setTopic(e.target.value)} type="text" placeholder="Search..." value={topic} />
-        <input className="week-input" onChange={(e) => setWeek(e.target.value)} type="number" placeholder="Weeks..."  value={week} />
+        <input className="week-input" onChange={(e) => setWeek(e.target.value)} type="number" placeholder="Weeks..." min={1} max={52} value={week} />
         <button>Map</button>
         
     </form>
