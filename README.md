@@ -18,6 +18,7 @@ This project is a full-stack web application called **PathFinder AI**, designed 
 
   * **User Authentication:** A secure and robust account system that allows users to register, log in, and log out. It uses **JSON Web Tokens (JWT)** for session management and **bcrypt** to securely hash all user passwords.
   * **AI-Powered Generation:** The core functionality, powered by the **Google Gemini API**, generates detailed, customizable learning roadmaps on a wide range of topics.
+  * **AI Mentor Chat:** An interactive chat feature that allows users to ask questions and get guidance on their learning roadmap from an AI mentor.
   * **Persistent Data Storage:** All generated roadmaps are stored in a **MongoDB** database, linked directly to the user's account. This ensures data is persistent and can be accessed across sessions.
   * **Personalized Dashboard:** A private dashboard for logged-in users to view, manage, and delete their previously saved roadmaps, creating a personalized learning library.
   * **Responsive Design:** The user interface is built to be clean, modern, and fully responsive, providing a seamless experience on both desktop and mobile devices.
@@ -154,6 +155,7 @@ The backend API provides the following endpoints:
   * `POST /api/roadmap`: Create a new roadmap (protected route).
   * `GET /api/roadmaps`: Get all roadmaps for the logged-in user (protected route).
   * `DELETE /api/roadmaps/:id`: Delete a specific roadmap for the logged-in user (protected route).
+  * `POST /api/chat/mentor`: Interact with the AI mentor (protected route).
 
 -----
 
