@@ -12,7 +12,8 @@ import {
   postToChatSession,
   getLeaderboard,
   createShareableLink,
-  getSharedRoadmap
+  getSharedRoadmap,
+  findResources
 } from "../controllers/roadmapController.js";
 
 const router = express.Router();
@@ -26,6 +27,7 @@ router.post('/roadmap/:id/share', protect, createShareableLink);
 router.post('/chat/mentor', protect, chatWithMentor);
 router.get('/chat/:roadmapId', protect, getChatSession);
 router.post('/chat/:roadmapId', protect, postToChatSession);
+router.post('/roadmap/resources', protect, findResources);
 
 // --- PUBLIC ROUTES (no login needed) ---
 router.get("/leaderboard", getLeaderboard); // "protect" has been removed here

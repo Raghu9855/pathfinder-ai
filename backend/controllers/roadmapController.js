@@ -2,12 +2,14 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Roadmap from '../models/roadmap.js';
 import User from '../models/User.js';
 import ChatSession from '../models/chatSession.js';
+import { google } from 'googleapis';
 import { nanoid } from 'nanoid';
 import { configDotenv } from 'dotenv';
 
 configDotenv(); // Load environment variables from .env file
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const customSearch = google.customsearch('v1');
 
 function extractJSON(text) {
   text = text.replace(/```json|```/g, '').trim(); // Remove backticks
@@ -523,6 +525,84 @@ export const getSharedRoadmap = async (req, res) => {
 
   } catch (error) {
     console.error("Error fetching shared roadmap:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// ... after your getSharedRoadmap function
+
+
+  
+export const findResources = async (req, res) => {
+  const { concept, topic } = req.body; 
+
+  if (!concept || !topic) {
+    return res.status(400).json({ error: "Concept and topic are required." });
+  }
+
+  try {
+    // --- Step 1: Use AI to formulate the search query ---
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const queryGenPrompt = `
+You are an expert at crafting precise Google search queries for beginners in programming.
+
+Task:
+Given a programming topic and a specific concept, generate ONE concise Google search query
+that helps a beginner find the most relevant tutorials, articles, or videos.
+
+Context:
+- Topic: "${topic}"
+- Concept: "${concept}"
+
+Guidelines:
+1. Focus on beginner-friendly learning resources.
+2. Include terms like "tutorial", "for beginners", or "explained" when suitable.
+3. Prefer trusted learning sources (e.g., MDN, freeCodeCamp, GeeksforGeeks, W3Schools).
+4. Do NOT include quotes, explanations, or extra words like "Here is your query:".
+5. Output ONLY the search query, plain text, nothing else.
+
+Examples:
+- JavaScript Promises tutorial for beginners MDN
+- Python dictionaries explained site:geeksforgeeks.org
+- React useEffect hook tutorial for beginners
+- C++ pointers explained site:w3schools.com
+
+Now, generate the single best Google search query for this topic and concept:
+`;
+
+    
+    const queryResult = await model.generateContent(queryGenPrompt);
+    const aiSearchQuery = (await queryResult.response.text()).trim();
+
+    // --- Step 2: Use the Google Custom Search API ---
+    const searchToolResponse = await customSearch.cse.list({
+      auth: process.env.GOOGLE_SEARCH_API_KEY,
+      cx: process.env.GOOGLE_SEARCH_ENGINE_ID,
+      q: aiSearchQuery,
+      num: 3 // Ask for only 3 results
+    });
+
+    // --- Step 3: Format and send the results ---
+    const results = searchToolResponse.data.items;
+    if (!results || results.length === 0) {
+      return res.status(404).json({ message: "No resources found for this topic." });
+    }
+
+    // Map the *real* API response to what our frontend expects
+    const resources = results.map(item => ({
+      title: item.title,
+      url: item.link,
+      snippet: item.snippet
+    }));
+
+    res.status(200).json(resources);
+
+  } catch (error) {
+    console.error("Error finding resources:", error);
+    // Check if it's an API key error
+    if (error.code === 403) {
+      return res.status(500).json({ message: "Server Error: Check Google API Key or Search Engine ID." });
+    }
     res.status(500).json({ message: "Server Error" });
   }
 };

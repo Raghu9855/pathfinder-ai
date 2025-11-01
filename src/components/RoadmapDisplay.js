@@ -1,16 +1,16 @@
 import React from "react";
+// We don't need ChatMentor here anymore
+// import ChatMentor from './ChatMentor'; 
 
-// 1. Update props to receive roadmapData and the handler
-function RoadmapDisplay({ roadmapData, onProgressChange }) {
+// 1. Add "onFindResources" to the props
+function RoadmapDisplay({ roadmapData, onProgressChange, onFindResources }) {
   
-  // 2. Destructure the full document
   const { roadmap, _id: roadmapId, completedConcepts } = roadmapData;
 
   if (!roadmap) {
     return <p>No roadmap data available.</p>;
   }
 
-  // 3. Handler to pass data up to HomePage
   const handleCheckboxChange = (concept, isCompleted) => {
     onProgressChange(roadmapId, concept, isCompleted);
   };
@@ -24,36 +24,47 @@ function RoadmapDisplay({ roadmapData, onProgressChange }) {
           <h3>
             Week {week.week}: {week.focus}
           </h3>
-          <ul>
+          {/* We are changing from <ul> to <div> for better layout */}
+          <div className="concepts-list-container">
             {week.concepts.map((concept, conceptIndex) => {
-              // 4. Check if this concept is in our completed list
               const isCompleted = completedConcepts.includes(concept);
               const checkboxId = `${roadmapId}-${index}-${conceptIndex}`;
 
               return (
-                <li key={conceptIndex} style={{ listStyleType: 'none', margin: '5px 0' }}>
-                  {/* 5. Render the checkbox and label */}
-                  <input 
-                    type="checkbox"
-                    id={checkboxId}
-                    checked={isCompleted}
-                    onChange={() => handleCheckboxChange(concept, !isCompleted)}
-                    style={{ marginRight: '10px' }}
-                  />
-                  <label 
-                    htmlFor={checkboxId}
-                    style={{ textDecoration: isCompleted ? 'line-through' : 'none', cursor: 'pointer' }}
-                  >
-                    {concept}
-                  </label>
-                </li>
+                // 2. This is now a container for each concept
+                <div key={conceptIndex} className="concept-item">
+                  <div className="concept-label-wrapper">
+                    <input 
+                      type="checkbox"
+                      id={checkboxId}
+                      checked={isCompleted}
+                      onChange={() => handleCheckboxChange(concept, !isCompleted)}
+                    />
+                    <label 
+                      htmlFor={checkboxId}
+                      style={{ textDecoration: isCompleted ? 'line-through' : 'none', cursor: 'pointer' }}
+                    >
+                      {concept}
+                    </label>
+                  </div>
+                  {/* 3. Add the new "Find Resources" button */}
+                  {!isCompleted && onFindResources && (
+                    <button 
+                      className="find-resources-btn"
+                      onClick={() => onFindResources(concept)}
+                    >
+                      Find Resources
+                    </button>
+                  )}
+                </div>
               );
             })}
-          </ul>
+          </div>
         </div>
 
       ))}
       </div>
+      {/* We no longer show the chat mentor here */}
     </div>
   );
 }

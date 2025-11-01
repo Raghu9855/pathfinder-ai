@@ -1,12 +1,19 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import RoadmapDisplay from '../components/RoadmapDisplay';
+import ResourceModal from '../components/ResourceModal';
 
 const MyRoadmapsPage = () => {
   const [myRoadmaps, setMyRoadmaps] = useState([]);
   const [selectedRoadmap, setSelectedRoadmap] = useState(null); // The roadmap to display
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(AuthContext);
+
+  // State for the resource modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isResourceLoading, setIsResourceLoading] = useState(false);
+  const [currentConcept, setCurrentConcept] = useState("");
+  const [resources, setResources] = useState([]);
 
   // Fetch all roadmaps on page load
   useEffect(() => {
@@ -58,7 +65,7 @@ const MyRoadmapsPage = () => {
     }
   };
 
- // Handle Sharing a Roadmap
+  // Handle Sharing a Roadmap
   const handleShareRoadmap = async (roadmapId) => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -74,11 +81,7 @@ const MyRoadmapsPage = () => {
       const data = await response.json();
       const shareableLink = `${window.location.origin}/roadmap/share/${data.shareableId}`;
       
-      // --- THIS IS THE FIX ---
-      // Use the Clipboard API to copy the link
       await navigator.clipboard.writeText(shareableLink);
-      
-      // Show a simple confirmation message
       alert("Shareable link copied to clipboard!");
       
     } catch (error) {
@@ -87,7 +90,7 @@ const MyRoadmapsPage = () => {
     }
   };
 
-  // Handle Progress Change (same as before)
+  // Handle Progress Change
   const handleProgressChange = async (roadmapId, concept, isCompleted) => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -110,6 +113,41 @@ const MyRoadmapsPage = () => {
       setMyRoadmaps(prev => prev.map(r => r._id === updatedRoadmap._id ? updatedRoadmap : r));
     } catch (error) {
       console.error("Error updating progress:", error);
+    }
+  };
+
+  // Handle Find Resources
+  const handleFindResources = async (topic, concept) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    setCurrentConcept(concept);
+    setIsResourceLoading(true);
+    setIsModalOpen(true);
+    setResources([]); 
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/roadmap/resources`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ topic, concept })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to find resources.');
+      }
+
+      const data = await response.json();
+      setResources(data);
+    
+    } catch (error) {
+      console.error("Error finding resources:", error);
+      setResources([]); 
+    } finally {
+      setIsResourceLoading(false);
     }
   };
 
@@ -150,9 +188,21 @@ const MyRoadmapsPage = () => {
       {selectedRoadmap && (
         <RoadmapDisplay 
           roadmapData={selectedRoadmap}
-          onProgressChange={handleProgressChange} 
+          onProgressChange={handleProgressChange}
+          // --- THIS IS THE FIX ---
+          // We pass the handler function as a prop here
+          onFindResources={(concept) => handleFindResources(selectedRoadmap.topic, concept)}
         />
       )}
+
+      {/* This renders the modal (it's hidden by default) */}
+      <ResourceModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        isLoading={isResourceLoading}
+        concept={currentConcept}
+        resources={resources}
+      />
     </div>
   );
 };
