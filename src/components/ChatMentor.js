@@ -1,23 +1,51 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 
-
-const ChatMentor = ({ roadmap }) => {
-  // 1. Initialize messages as an empty array.
+const ChatMentor = ({ roadmapData }) => {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Used for chat responses
   const messageDisplayRef = useRef(null);
 
-  // 2. Use a useEffect hook to reset the chat when the roadmap changes.
+  // This useEffect now runs ONCE when the component is created
+  // (or re-created by the 'key' prop in MentorPage)
   useEffect(() => {
-    if (roadmap && roadmap.title) {
-      // This will now run every time a new roadmap is selected.
-      setMessages([
-        { sender: 'ai', text: `Hello! I'm your AI mentor. How can I help you with your roadmap for **${roadmap.title}**?` }
-      ]);
-    }
-  }, [roadmap]); // The hook depends on the 'roadmap' prop.
+    const loadChatHistory = async () => {
+      setIsLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/api/chat/${roadmapData._id}`, 
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to load chat history.');
+        }
+
+        const history = await response.json();
+
+        // If history is empty, add the welcome message.
+        if (history.length === 0) {
+          setMessages([
+            { sender: 'ai', text: `Hello! I'm your AI mentor. How can I help you with your roadmap for **${roadmapData.roadmap.title}**?` }
+          ]);
+        } else {
+          setMessages(history);
+        }
+
+      } catch (error) {
+        console.error("Error loading chat:", error);
+        setMessages([{ sender: 'ai', text: "Sorry, I couldn't load our previous chat. Let's start over." }]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadChatHistory();
+  }, [roadmapData]); // This runs when the component mounts
 
   // Automatically scroll to the bottom when new messages are added
   useEffect(() => {
@@ -31,32 +59,36 @@ const ChatMentor = ({ roadmap }) => {
     e.preventDefault();
     if (!userInput.trim()) return;
 
-    const newMessages = [...messages, { sender: 'user', text: userInput }];
-    setMessages(newMessages);
+    const userMessage = { sender: 'user', text: userInput };
+    // Optimistically update the UI with the user's message
+    setMessages(prev => [...prev, userMessage]);
+    
     setUserInput('');
     setIsLoading(true);
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/chat/mentor`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          userQuestion: userInput,
-          chatHistory: newMessages,
-          roadmap: roadmap,
-        }),
-      });
+      // Call the NEW POST route
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/api/chat/${roadmapData._id}`, 
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          // We only need to send the new question!
+          body: JSON.stringify({ userQuestion: userInput }),
+        }
+      );
 
-      const data = await response.json();
+      const aiMessage = await response.json(); // The server sends back *only* the new AI message
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to get a response.');
+        throw new Error(aiMessage.error || 'Failed to get a response.');
       }
       
-      setMessages(prev => [...prev, { sender: 'ai', text: data.response }]);
+      // Add the new AI message to the list
+      setMessages(prev => [...prev, aiMessage]);
 
     } catch (error) {
       console.error("Error with mentor chat:", error);
@@ -68,7 +100,9 @@ const ChatMentor = ({ roadmap }) => {
 
   return (
     <div className="chat-mentor-container">
-      <h3>Your AI Mentor</h3>
+      {/* This is no longer a <H3> because the page has its own H1.
+        We remove the title to make it a seamless part of the page.
+      */}
       <div className="message-display" ref={messageDisplayRef}>
         {messages.map((msg, index) => (
           <div key={index} className={`message ${msg.sender}`}>

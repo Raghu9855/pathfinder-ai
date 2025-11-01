@@ -36,7 +36,6 @@ const RegisterPage = () => {
 
   return (
     <div className="auth-page-wrapper">
-      {/* --- Creative Introduction Section --- */}
       <div className="intro-container">
         <div className="intro-logo">PathFinder AI</div>
         <h1>Unlock Your Learning Potential.</h1>
@@ -44,8 +43,6 @@ const RegisterPage = () => {
           Generate AI-powered roadmaps for any skill, from coding to cooking. Your personalized learning journey starts here.
         </p>
       </div>
-
-      {/* --- Registration Form Section --- */}
       <div className="auth-form-container">
         <h2>Create Your Account</h2>
         <form className="auth-form" onSubmit={handleRegister}>

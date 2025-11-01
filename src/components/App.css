@@ -556,6 +556,133 @@ button:hover {
   animation-delay: -0.16s;
 }
 
+/* --- 11. Leaderboard Styles --- */
+.leaderboard-container {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 25px;
+  margin-top: 40px;
+}
+
+.leaderboard-container h1 {
+  text-align: left;
+  margin-top: 0;
+}
+
+.leaderboard-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 10px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 1.1em;
+}
+
+.leaderboard-item:last-child {
+  border-bottom: none;
+}
+
+.leaderboard-rank {
+  font-weight: 700;
+  font-size: 1.2em;
+  color: var(--accent-color);
+  width: 40px;
+}
+
+.leaderboard-name {
+  font-weight: 500;
+  flex-grow: 1;
+}
+
+.leaderboard-score {
+  font-weight: 700;
+  color: var(--secondary-text-color);
+  font-size: 0.9em;
+}
+
+/* --- 12. Mentor Page Styles --- */
+.mentor-page-container {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 25px;
+  margin-top: 40px;
+}
+
+.mentor-page-container h1 {
+  text-align: left;
+  margin-top: 0;
+}
+
+.roadmap-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 25px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 25px;
+}
+
+.roadmap-selector label {
+  font-weight: 500;
+  font-size: 1.1em;
+}
+
+.roadmap-selector select {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-family: var(--main-font);
+}
+
+
+/* --- 13. Shareable Roadmap Page --- */
+.shareable-roadmap-container {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 25px;
+  margin-top: 40px;
+}
+
+.shareable-roadmap-container h2 {
+  text-align: left;
+  margin-top: 0;
+}
+
+/* Re-use roadmap-container grid */
+.shareable-roadmap-container .roadmap-container {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 600px) {
+  .shareable-roadmap-container .roadmap-container {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+/* Read-only concept list */
+.concepts-list {
+  list-style-type: '•';
+  padding-left: 20px;
+}
+
+.concepts-list li {
+  padding: 6px 0;
+  font-size: 0.9em;
+  color: var(--secondary-text-color);
+  margin-left: 10px;
+}
 
 
 
