@@ -50,7 +50,7 @@ body[data-theme='dark'] {
   }
 }
 
-/* --- 2. Main Layout & Typography --- */
+/* --- 2. Main Layout & Typography (Mobile-First) --- */
 .app-container {
   max-width: 900px;
   margin: 20px auto;
@@ -68,7 +68,7 @@ h1 {
   font-size: 2.2em;
 }
 
-/* --- 3. Navbar --- */
+/* --- 3. Navbar (Mobile-First) --- */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -76,7 +76,6 @@ h1 {
   padding: 15px;
   margin-bottom: 30px;
   border-bottom: 1px solid var(--border-color);
-  flex-wrap: wrap;
   gap: 15px;
 }
 
@@ -87,27 +86,85 @@ h1 {
   text-decoration: none;
 }
 
-.navbar-links {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+/* --- HIDE DESKTOP LINKS ON MOBILE --- */
+.navbar-links-desktop {
+  display: none; /* Hidden by default (mobile-first) */
 }
 
-.navbar a, .navbar button {
+/* --- BURGER MENU ICON --- */
+.burger-menu {
+  display: block; /* Visible by default (mobile-first) */
+  font-size: 1.8rem;
   color: var(--text-color);
-  font-weight: 500;
-  text-decoration: none;
-  background: none;
-  border: none;
-  font-size: 1rem;
   cursor: pointer;
-  transition: color 0.3s;
+  z-index: 1002; /* Make sure it's on top */
 }
 
-.navbar a:hover, .navbar button:hover {
-    color: var(--accent-color);
+/* --- MOBILE NAV MENU --- */
+.mobile-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  
+  background-color: var(--background-color);
+  position: fixed; /* Full-screen overlay */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  
+  /* Hidden by default */
+  opacity: 0;
+  transform: translateX(-100%);
+  visibility: hidden;
+
+  transition: all 0.3s ease-in-out;
+  z-index: 1001;
 }
 
+.mobile-nav.open {
+  opacity: 1;
+  transform: translateX(0);
+  visibility: visible;
+}
+
+/* Links inside mobile nav */
+.mobile-nav a,
+.mobile-nav .theme-toggle-button {
+  font-size: 1.5rem;
+  color: var(--text-color);
+  text-decoration: none;
+  padding: 10px 20px;
+}
+
+.mobile-nav .theme-toggle-button {
+  width: 60px;
+  height: 60px;
+  font-size: 1.5rem;
+}
+
+.user-info-mobile {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--secondary-text-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.logout-button-mobile {
+  font-size: 1.2rem;
+  background-color: transparent;
+  color: var(--delete-color);
+  border: 1px solid var(--delete-color);
+  border-radius: var(--border-radius);
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+/* --- Desktop Theme Toggle --- */
 .theme-toggle-button {
   width: 40px;
   height: 40px;
@@ -116,11 +173,17 @@ h1 {
   justify-content: center;
   align-items: center;
   background: none;
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
+  border: none; /* Removed border */
+  color: var(--secondary-text-color); /* Changed color */
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
+  transition: all 0.3s ease;
+  font-size: 1.2rem; /* Added */
+}
+
+.theme-toggle-button:hover {
+  color: var(--accent-color);
 }
 
 .theme-toggle-button svg {
@@ -141,20 +204,24 @@ h1 {
   white-space: nowrap;
 }
 
+/* --- Desktop Logout Button --- */
 .logout-button {
-  background-color: var(--accent-color);
-  color: #fff;
-  border: none;
+  background-color: #fff; /* White background */
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
   border-radius: var(--border-radius);
-  padding: 8px 15px;
+  padding: 5px 10px; /* Made smaller */
   font-size: 0.9em;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
 }
 
 .logout-button:hover {
-  background-color: #492eb1;
+  background-color: var(--accent-color);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 
@@ -187,7 +254,7 @@ input:focus {
   box-shadow: 0 0 0 3px rgba(90, 61, 224, 0.2);
 }
 
-button {
+button, .button {
   padding: 12px 20px;
   background-color: var(--accent-color);
   color: #fff;
@@ -196,14 +263,37 @@ button {
   cursor: pointer;
   font-size: 1rem;
   font-weight: bold;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-button:hover {
-  background-color: #492eb1;
+button:hover, .button:hover {
+  filter: brightness(115%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* --- Search Form Specifics --- */
+button:disabled, .button:disabled {
+  background-color: var(--secondary-text-color);
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.button-secondary {
+  background-color: transparent;
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+}
+
+.button-secondary:hover {
+  background-color: var(--accent-color);
+  color: #fff;
+}
+
+
+/* --- Search Form Specifics (Mobile-First) --- */
 .search-form {
   flex-direction: column;
   padding: 20px;
@@ -220,7 +310,7 @@ button:hover {
   width: 100%;
 }
 
-/* --- 5. Creative Login/Register Page Layout --- */
+/* --- 5. Login/Register Page (Mobile-First) --- */
 .auth-page-wrapper {
   display: grid;
   grid-template-columns: 1fr;
@@ -305,7 +395,7 @@ button:hover {
   text-decoration: none;
 }
 
-/* --- 6. Roadmap Card Display --- */
+/* --- 6. Roadmap Card Display (Mobile-First) --- */
 .roadmap-container {
   display: grid;
   grid-template-columns: 1fr;
@@ -351,7 +441,7 @@ button:hover {
   color: var(--accent-color);
 }
 
-/* --- 7. My Roadmaps Section --- */
+/* --- 7. My Roadmaps Section (Mobile-First) --- */
 .my-roadmaps-container, .my-roadmaps-list {
   background-color: var(--card-background);
   border: 1px solid var(--border-color);
@@ -409,16 +499,19 @@ button:hover {
 }
 
 .delete-button {
-  background-color: transparent;
-  color: var(--delete-color);
-  border: 1px solid var(--delete-color);
+  background-color: var(--delete-color);
+  color: #fff;
+  border: none;
   padding: 6px 12px;
   font-size: 0.85em;
+  font-weight: 500;
+  border-radius: var(--border-radius);
+  transition: all 0.3s ease;
 }
 
 .delete-button:hover {
-  background-color: var(--delete-color);
-  color: #fff;
+  filter: brightness(115%);
+  transform: translateY(-2px);
 }
 
 /* --- 9. Loader Animation --- */
@@ -565,9 +658,17 @@ button:hover {
   margin-top: 40px;
 }
 
+/* UPDATED: Center leaderboard text */
 .leaderboard-container h1 {
-  text-align: left;
+  text-align: center;
   margin-top: 0;
+}
+
+.leaderboard-container p {
+  text-align: center;
+  color: var(--secondary-text-color);
+  margin-top: -1em;
+  margin-bottom: 2em;
 }
 
 .leaderboard-list {
@@ -579,9 +680,9 @@ button:hover {
 .leaderboard-item {
   display: flex;
   align-items: center;
-  padding: 15px 10px;
+  padding: 18px 10px; /* Increased padding */
   border-bottom: 1px solid var(--border-color);
-  font-size: 1.1em;
+  font-size: 1rem; /* Standardized font size */
 }
 
 .leaderboard-item:last-child {
@@ -590,9 +691,9 @@ button:hover {
 
 .leaderboard-rank {
   font-weight: 700;
-  font-size: 1.2em;
-  color: var(--accent-color);
-  width: 40px;
+  font-size: 1rem;
+  color: var(--secondary-text-color);
+  width: 50px; /* Give rank more space */
 }
 
 .leaderboard-name {
@@ -660,15 +761,8 @@ button:hover {
   margin-top: 0;
 }
 
-/* Re-use roadmap-container grid */
 .shareable-roadmap-container .roadmap-container {
   grid-template-columns: 1fr;
-}
-
-@media (min-width: 600px) {
-  .shareable-roadmap-container .roadmap-container {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  }
 }
 
 /* Read-only concept list */
@@ -798,64 +892,24 @@ button:hover {
   color: var(--accent-color);
   border: 1px solid var(--accent-color);
   margin-left: 24px; /* Aligns it under the label text */
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .find-resources-btn:hover {
   background-color: var(--accent-color);
   color: #fff;
-}
-
-/* Make it side-by-side on larger screens */
-@media (min-width: 600px) {
-  .concept-item {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .find-resources-btn {
-    margin-left: 0;
-  }
-}
-
-/* --- 8. Media Queries for Responsiveness --- */
-
-/* Medium screens (tablets) */
-@media (min-width: 600px) {
-  .app-container {
-    padding: 0 30px;
-  }
-
-  .search-form {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .week-input {
-    width: 120px;
-  }
-
-  .roadmap-container {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  }
-
-  .roadmap-item {
-    grid-template-columns: 1fr auto auto;
-    grid-template-areas: "info date actions";
-  }
-
-  .roadmap-date {
-    font-size: 0.85em;
-  }
+  transform: none; /* No lift for these small buttons */
+  box-shadow: none;
 }
 
 /* --- 16. Q&A Page Styles --- */
-
-/* Helper for card styling */
 .card-style {
   background-color: var(--card-background);
   border-radius: var(--border-radius);
   padding: 25px;
-  box-shadow: var(--card-shadow);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Softer shadow */
   margin-bottom: 25px;
 }
 
@@ -915,7 +969,8 @@ button:hover {
 
 .question-meta {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap; /* Allow meta to wrap on small screens */
+  gap: 15px 20px;
   font-size: 0.85em;
   color: var(--secondary-text-color);
 }
@@ -986,6 +1041,8 @@ button:hover {
   font-size: 0.9em;
   padding: 6px 12px;
   font-weight: 500;
+  border-radius: var(--border-radius);
+  transition: all 0.3s ease;
 }
 
 .upvote-btn:hover {
@@ -993,6 +1050,16 @@ button:hover {
   color: var(--accent-color);
   background-color: var(--background-color);
 }
+
+.upvote-btn:active,
+.upvote-btn[style*="rgb(90, 61, 224)"],
+.upvote-btn[style*="rgb(52, 152, 219)"]
+{
+  background-color: var(--accent-color);
+  color: #fff;
+  border-color: var(--accent-color);
+}
+
 
 .answer-form h2 {
   text-align: left;
@@ -1010,8 +1077,108 @@ button:hover {
   font-family: var(--main-font);
 }
 
-/* For the creative auth page layout */
-@media (min-width: 850px) {
+/* --- 17. Responsive Media Queries --- */
+
+/* Small devices (e.g., iPhone SE) */
+@media (max-width: 480px) {
+  .auth-form-container {
+    padding: 25px 20px; /* Reduce padding on very small screens */
+  }
+
+  h1 {
+    font-size: 2em; /* Slightly smaller h1 */
+  }
+
+  .question-post h1 {
+    font-size: 1.8em;
+  }
+}
+
+/* Medium screens (tablets) - This is where the switch happens */
+@media (min-width: 768px) {
+  .app-container {
+    padding: 0 30px;
+  }
+  
+  .navbar {
+    flex-wrap: nowrap; /* Prevent navbar from wrapping */
+    padding: 15px 30px;
+  }
+
+  /* --- HIDE BURGER, SHOW DESKTOP LINKS --- */
+  .burger-menu {
+    display: none;
+  }
+
+  /* --- UPDATED: Desktop Nav Link styles --- */
+  .navbar-links-desktop {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Increase gap for desktop */
+  }
+
+  .navbar-links-desktop a {
+    color: var(--secondary-text-color);
+    font-weight: 500;
+    text-decoration: none;
+    background: none;
+    border: none;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0; /* Remove padding */
+    border-radius: 0;
+    transition: all 0.3s ease;
+  }
+
+  .navbar-links-desktop a:hover {
+      background-color: transparent; /* No background on hover */
+      color: var(--accent-color);
+      text-decoration: underline;
+  }
+  
+  /* Make sure mobile nav is never shown on desktop */
+  .mobile-nav {
+    display: none;
+  }
+
+  /* --- Other layout adjustments --- */
+  .search-form {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .week-input {
+    width: 120px;
+  }
+  
+  .roadmap-container {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  .shareable-roadmap-container .roadmap-container {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  .roadmap-item {
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas: "info date actions";
+  }
+
+  .roadmap-date {
+    font-size: 0.85em;
+  }
+  
+  .concept-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .find-resources-btn {
+    margin-left: 0;
+  }
+
+  /* 2-column auth page */
   .auth-page-wrapper {
     grid-template-columns: 1fr 1fr;
     padding: 20px 40px;
@@ -1025,7 +1192,7 @@ button:hover {
 }
 
 /* Large screens (desktops) */
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .app-container {
     margin: 40px auto;
   }
@@ -1033,8 +1200,16 @@ button:hover {
   .navbar {
     padding: 20px 40px;
   }
+  
+  .navbar-links-desktop {
+    gap: 20px; /* Increase gap more for wide screens */
+  }
 
   h1 {
+    font-size: 2.5em;
+  }
+  
+  .question-post h1 {
     font-size: 2.5em;
   }
 }
