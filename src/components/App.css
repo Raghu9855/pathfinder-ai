@@ -848,6 +848,168 @@ button:hover {
   }
 }
 
+/* --- 16. Q&A Page Styles --- */
+
+/* Helper for card styling */
+.card-style {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  padding: 25px;
+  box-shadow: var(--card-shadow);
+  margin-bottom: 25px;
+}
+
+.qa-container h1 {
+  text-align: left;
+}
+
+.question-form h2 {
+  text-align: left;
+  margin-top: 0;
+}
+
+.question-form textarea {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-family: var(--main-font);
+}
+
+.question-list h2 {
+  text-align: left;
+  margin-top: 40px;
+}
+
+.question-item h3 {
+  margin: 0;
+  color: var(--accent-color);
+  text-align: left;
+}
+
+.question-item a {
+  text-decoration: none;
+}
+.question-item a:hover h3 {
+  text-decoration: underline;
+}
+
+.question-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 15px 0;
+}
+
+.tag {
+  background-color: var(--background-color);
+  color: var(--secondary-text-color);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.question-meta {
+  display: flex;
+  gap: 20px;
+  font-size: 0.85em;
+  color: var(--secondary-text-color);
+}
+
+/* --- Question Detail Page --- */
+.question-post h1 {
+  text-align: left;
+  color: var(--text-color);
+  font-size: 2.2em;
+  margin-bottom: 15px;
+}
+
+.topic-badge {
+  display: inline-block;
+  background-color: var(--accent-color);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.original-question-text {
+  font-style: italic;
+  color: var(--secondary-text-color);
+  border-left: 3px solid var(--accent-color);
+  padding-left: 15px;
+}
+
+.answers-list h2 {
+  text-align: left;
+  margin-top: 40px;
+}
+
+.answer-item {
+  position: relative;
+}
+
+.answer-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.answer-author {
+  font-weight: 700;
+}
+
+.ai-badge {
+  background-color: var(--accent-color);
+  color: #fff;
+  font-size: 0.75em;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.answer-actions {
+  margin-top: 20px;
+}
+
+.upvote-btn {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  font-size: 0.9em;
+  padding: 6px 12px;
+  font-weight: 500;
+}
+
+.upvote-btn:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  background-color: var(--background-color);
+}
+
+.answer-form h2 {
+  text-align: left;
+  margin-top: 0;
+}
+
+.answer-form textarea {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-family: var(--main-font);
+}
+
 /* For the creative auth page layout */
 @media (min-width: 850px) {
   .auth-page-wrapper {

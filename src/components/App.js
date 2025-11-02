@@ -5,12 +5,14 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from '../pages/Navbar';
 import RegisterPage from "../pages/RegisterPage";
 import LoginPage from "../pages/LoginPage";
-import DashboardPage from "../pages/DashboardPage"; // <-- Your search page
-import MyRoadmapsPage from "../pages/MyRoadmapsPage"; // <-- Your new list page
+import DashboardPage from "../pages/DashboardPage"; 
+import MyRoadmapsPage from "../pages/MyRoadmapsPage"; 
 import LeaderboardPage from "../pages/LeaderboardPage";
 import MentorPage from "../pages/MentorPage";
 import ShareableRoadmapPage from "../pages/ShareableRoadmapPage";
 import IndexPage from "../pages/IndexPage";
+import QAPage from "../pages/QAPage"; 
+import QuestionDetailPage from "../pages/QuestionDetailPage";
 import { AuthProvider } from '../context/AuthContext';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -46,6 +48,24 @@ function App() {
               <>
                 <Navbar /> 
                 <ShareableRoadmapPage />
+              </>
+            } 
+          />
+          <Route 
+            path="/community"
+            element={
+              <>
+                <Navbar /> 
+                <QAPage />
+              </>
+            } 
+          />
+          <Route 
+            path="/community/:id"
+            element={
+              <>
+                <Navbar /> 
+                <QuestionDetailPage />
               </>
             } 
           />

@@ -37,6 +37,8 @@ const Navbar = () => {
             <Link to="/roadmaps">My Roadmaps</Link> 
             
             <Link to="/mentor">AI Mentor</Link>
+
+            <Link to="/community">Q&A</Link>
             
             {/* This will ONLY be hidden if we are on the public share page */}
             {!isPublicSharePage && (

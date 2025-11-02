@@ -4,6 +4,7 @@ import { configDotenv } from 'dotenv';
 import { connectDB }  from "./config/db.js";  
 import userRoutes from './routes/userRoutes.js';
 import roadmapRoutes from './routes/roadmapRoutes.js';
+import questionRoutes from './routes/questionRoutes.js';
 configDotenv(); // This loads environment variables from a .env file
 // --- Basic Server Setup ---
 const app = express();
@@ -22,6 +23,7 @@ if (!process.env.GEMINI_API_KEY) {
 
 app.use("/api/users", userRoutes);
 app.use("/api/", roadmapRoutes);
+app.use("/api/questions", questionRoutes);
 
 
 // --- Start the Server ---
