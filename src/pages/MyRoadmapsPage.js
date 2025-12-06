@@ -1,209 +1,122 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import React, { useState } from 'react';
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
+import { FaPlus, FaArrowLeft, FaBookOpen } from 'react-icons/fa';
+
 import RoadmapDisplay from '../components/RoadmapDisplay';
 import ResourceModal from '../components/ResourceModal';
+import RoadmapCard from '../components/RoadmapCard';
+import { useRoadmaps } from '../hooks/useRoadmaps';
 
 const MyRoadmapsPage = () => {
-  const [myRoadmaps, setMyRoadmaps] = useState([]);
-  const [selectedRoadmap, setSelectedRoadmap] = useState(null); // The roadmap to display
-  const [isLoading, setIsLoading] = useState(true);
-  const { user } = useContext(AuthContext);
+  const { roadmaps, isLoading, deleteRoadmap, shareRoadmap, updateProgress } = useRoadmaps();
+  const [selectedRoadmap, setSelectedRoadmap] = useState(null);
 
-  // State for the resource modal
+  // Resource Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isResourceLoading, setIsResourceLoading] = useState(false);
   const [currentConcept, setCurrentConcept] = useState("");
   const [resources, setResources] = useState([]);
 
-  // Fetch all roadmaps on page load
-  useEffect(() => {
-    const fetchMyRoadmaps = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-      
-      try {
-        setIsLoading(true);
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/roadmaps`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!response.ok) throw new Error("Failed to fetch roadmaps");
-        const data = await response.json();
-        setMyRoadmaps(data);
-      } catch (error) {
-        console.error("Error fetching roadmaps:", error);
-      } finally {
-        setIsLoading(false);
+  const handleDeleteClick = async (roadmapId, e) => {
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this roadmap?")) {
+      const success = await deleteRoadmap(roadmapId);
+      if (success && selectedRoadmap?._id === roadmapId) {
+        setSelectedRoadmap(null);
       }
-    };
-
-    if (user) {
-      fetchMyRoadmaps();
-    }
-  }, [user]);
-
-  // Handle Deleting a Roadmap
-  const handleDelete = async (roadmapId) => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    if (!window.confirm("Are you sure you want to delete this roadmap?")) return;
-
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/roadmaps/${roadmapId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (!response.ok) throw new Error('Failed to delete.');
-
-      setMyRoadmaps(prev => prev.filter(r => r._id !== roadmapId));
-      if (selectedRoadmap && selectedRoadmap._id === roadmapId) {
-        setSelectedRoadmap(null); // Clear display if deleted
-      }
-    } catch (error) {
-      console.error("Error deleting roadmap:", error);
     }
   };
 
-  // Handle Sharing a Roadmap
-  const handleShareRoadmap = async (roadmapId) => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/roadmap/${roadmapId}/share`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (!response.ok) throw new Error('Failed to create shareable link.');
-
-      const data = await response.json();
-      const shareableLink = `${window.location.origin}/roadmap/share/${data.shareableId}`;
-      
-      await navigator.clipboard.writeText(shareableLink);
-      alert("Shareable link copied to clipboard!");
-      
-    } catch (error) {
-      console.error("Error creating share link:", error);
-      alert("Error: Could not create a shareable link.");
-    }
-  };
-
-  // Handle Progress Change
   const handleProgressChange = async (roadmapId, concept, isCompleted) => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/roadmaps/${roadmapId}/progress`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ concept, completed: isCompleted })
-      });
-
-      if (!response.ok) throw new Error('Failed to update progress');
-
-      const updatedRoadmap = await response.json();
-      
-      setSelectedRoadmap(updatedRoadmap); // Update the one being displayed
-      setMyRoadmaps(prev => prev.map(r => r._id === updatedRoadmap._id ? updatedRoadmap : r));
-    } catch (error) {
-      console.error("Error updating progress:", error);
+    const updated = await updateProgress(roadmapId, concept, isCompleted);
+    if (updated && selectedRoadmap?._id === roadmapId) {
+      setSelectedRoadmap(updated);
     }
   };
 
-  // Handle Find Resources
   const handleFindResources = async (topic, concept) => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
     setCurrentConcept(concept);
     setIsResourceLoading(true);
     setIsModalOpen(true);
-    setResources([]); 
+    setResources([]);
 
+    // Ideally extract this to a hook too, but keeping it here for now
+    const token = localStorage.getItem("token");
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/roadmap/resources`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ topic, concept })
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to find resources.');
-      }
-
       const data = await response.json();
       setResources(data);
-    
-    } catch (error) {
-      console.error("Error finding resources:", error);
-      setResources([]); 
-    } finally {
-      setIsResourceLoading(false);
-    }
+    } catch (e) { toast.error("No resources found"); }
+    finally { setIsResourceLoading(false); }
   };
 
-  return (
-    <div className="app-container">
-      <div className="my-roadmaps-list">
-        <h2>My Roadmaps</h2>
-        {isLoading && <p>Loading...</p>}
-        {myRoadmaps.length === 0 && !isLoading ? (
-          <p>No roadmaps saved yet. Go to the dashboard to create one!</p>
-        ) : (
-          <ul>
-            {myRoadmaps.map((savedRoadmap) => (
-              <li key={savedRoadmap._id} className="roadmap-item">
-                <button onClick={() => setSelectedRoadmap(savedRoadmap)}>
-                  {savedRoadmap.topic}
-                </button>
-                <span className="roadmap-date">{new Date(savedRoadmap.createdAt).toLocaleDateString()}</span>
-                <button
-                  onClick={() => handleShareRoadmap(savedRoadmap._id)}
-                  style={{ marginLeft: '10px', backgroundColor: '#3498db', color: 'white' }}
-                >
-                  Share
-                </button>
-                <button 
-                  onClick={() => handleDelete(savedRoadmap._id)} 
-                  style={{ marginLeft: '10px', backgroundColor: '#ff4d4d', color: 'white' }}
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* This section will show the roadmap when one is selected */}
-      {selectedRoadmap && (
-        <RoadmapDisplay 
+  if (selectedRoadmap) {
+    return (
+      <Container className="py-5 animate-slide-up">
+        <div className="mb-4">
+          <Button variant="link" className="text-decoration-none text-muted p-0 d-flex align-items-center" onClick={() => setSelectedRoadmap(null)}>
+            <FaArrowLeft className="me-2" /> Back to Library
+          </Button>
+        </div>
+        <RoadmapDisplay
           roadmapData={selectedRoadmap}
           onProgressChange={handleProgressChange}
-          // --- THIS IS THE FIX ---
-          // We pass the handler function as a prop here
           onFindResources={(concept) => handleFindResources(selectedRoadmap.topic, concept)}
         />
-      )}
+        <ResourceModal
+          isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}
+          isLoading={isResourceLoading} concept={currentConcept} resources={resources}
+        />
+      </Container>
+    );
+  }
 
-      {/* This renders the modal (it's hidden by default) */}
-      <ResourceModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        isLoading={isResourceLoading}
-        concept={currentConcept}
-        resources={resources}
-      />
-    </div>
+  return (
+    <Container className="py-5 animate-slide-up">
+      <div className="d-flex justify-content-between align-items-center mb-5">
+        <div>
+          <h1 className="fw-bold mb-1">My Library</h1>
+          <p className="text-muted">Manage your active learning paths.</p>
+        </div>
+        <Link to="/dashboard">
+          <Button variant="primary" className="shadow-sm rounded-pill px-4">
+            <FaPlus className="me-2" /> New Roadmap
+          </Button>
+        </Link>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-5"><div className="spinner-border text-primary"></div></div>
+      ) : roadmaps.length === 0 ? (
+        <Card className="text-center border-0 shadow-sm py-5 bg-light rounded-4">
+          <Card.Body>
+            <FaBookOpen size={50} className="text-muted mb-3 opacity-50" />
+            <h4>No Roadmaps Yet</h4>
+            <p className="text-muted mb-4">Start your journey by creating a new learning path.</p>
+            <Link to="/dashboard"><Button variant="outline-primary" className="rounded-pill px-4">Get Started</Button></Link>
+          </Card.Body>
+        </Card>
+      ) : (
+        <Row className="g-4">
+          {roadmaps.map((roadmap) => (
+            <Col md={6} lg={4} key={roadmap._id}>
+              <RoadmapCard
+                roadmap={roadmap}
+                onClick={setSelectedRoadmap}
+                onShare={(id, e) => { e.stopPropagation(); shareRoadmap(id); }}
+                onDelete={handleDeleteClick}
+              />
+            </Col>
+          ))}
+        </Row>
+      )}
+    </Container>
   );
 };
 

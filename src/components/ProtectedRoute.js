@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 // 1. Fixed import path (added ../)
 import { AuthContext } from '../context/AuthContext';
 // 2. Fixed import path (added ../)
-import Navbar from '../pages/Navbar';
+
 
 const ProtectedRoute = () => {
   const { user } = useContext(AuthContext);
@@ -15,12 +15,7 @@ const ProtectedRoute = () => {
   }
 
   // If logged in, show the Navbar and the protected page
-  return (
-    <>
-      <Navbar />
-      <Outlet />
-    </>
-  );
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

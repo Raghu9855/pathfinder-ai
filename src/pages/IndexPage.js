@@ -6,7 +6,17 @@ import { AuthContext } from '../context/AuthContext';
 // It checks if a user is logged in and sends them to the
 // correct page.
 const IndexPage = () => {
-  const { user } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   // If user exists, go to their private dashboard.
   // If not, go to the public login page.

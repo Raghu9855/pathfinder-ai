@@ -1,29 +1,19 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react'; // 1. Import useCallback
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import ReactMarkdown from 'react-markdown';
-
-const Loader = () => (
-  <div className="loader-container">
-    <div className="loader-dots">
-      <span className="dot"></span>
-      <span className="dot"></span>
-      <span className="dot"></span>
-    </div>
-    <p className="loader-text">Loading...</p>
-  </div>
-);
+import { Container, Card, Badge, Form, Button, Row, Col, Alert } from 'react-bootstrap';
+import toast from 'react-hot-toast';
+import { FaArrowUp, FaUserCircle, FaRobot } from 'react-icons/fa';
 
 const QuestionDetailPage = () => {
   const { user } = useContext(AuthContext);
-  const { id } = useParams(); // Get question ID from URL
+  const { id } = useParams();
   const [question, setQuestion] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [newAnswer, setNewAnswer] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 2. Wrap fetchQuestion in useCallback
-  // This memoizes the function, so it doesn't get redefined on every render
   const fetchQuestion = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -32,147 +22,156 @@ const QuestionDetailPage = () => {
       const data = await response.json();
       setQuestion(data);
     } catch (error) {
-      console.error("Error fetching question:", error);
+      toast.error("Failed to load question.");
     } finally {
       setIsLoading(false);
     }
-  }, [id]); // 3. Add `id` as a dependency for useCallback
+  }, [id]);
 
   useEffect(() => {
     fetchQuestion();
-  }, [fetchQuestion]); // 4. Now we can safely add `fetchQuestion`
+  }, [fetchQuestion]);
 
-  // Handle submitting a new human answer
   const handleAddAnswer = async (e) => {
     e.preventDefault();
     if (!newAnswer.trim()) return;
-
-    const token = localStorage.getItem("token");
-    if (!token) return alert('Please log in to answer.');
+    if (!user) return toast.error("Please log in.");
 
     setIsSubmitting(true);
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/questions/${id}/answers`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ text: newAnswer })
       });
 
-      if (!response.ok) throw new Error('Failed to submit answer');
-      
+      if (!response.ok) throw new Error('Failed');
       const addedAnswer = await response.json();
-      setQuestion(prev => ({
-        ...prev,
-        answers: [...prev.answers, addedAnswer]
-      }));
-      setNewAnswer(''); // Clear textarea
-
+      
+      setQuestion(prev => ({ ...prev, answers: [...prev.answers, addedAnswer] }));
+      setNewAnswer('');
+      toast.success("Answer posted!");
     } catch (error) {
-      console.error("Error submitting answer:", error);
+      toast.error("Failed to post answer.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Handle upvoting an answer
   const handleUpvote = async (answerId) => {
+    if (!user) return toast.error('Login to upvote.');
     const token = localStorage.getItem("token");
-    if (!token) return alert('Please log in to upvote.');
 
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/questions/answers/${answerId}/upvote`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
-      if (!response.ok) throw new Error('Failed to upvote');
-      
+      if (!response.ok) throw new Error('Failed');
       const updatedAnswer = await response.json();
       
-      // Update the state
       setQuestion(prev => ({
         ...prev,
-        answers: prev.answers.map(a => 
-          a._id === updatedAnswer._id ? updatedAnswer : a
-        )
+        answers: prev.answers.map(a => a._id === updatedAnswer._id ? updatedAnswer : a)
       }));
-
     } catch (error) {
-      console.error("Error upvoting:", error);
+      toast.error("Could not upvote.");
     }
   };
 
-  if (isLoading) return <Loader />;
-  if (!question) return <p>Question not found.</p>;
+  if (isLoading) return <Container className="py-5 text-center"><div className="spinner-border text-primary"></div></Container>;
+  if (!question) return <Container className="py-5 text-center"><h3>Question not found.</h3><Link to="/community">Back to Community</Link></Container>;
 
-  // Sort answers by upvotes (descending)
   const sortedAnswers = [...question.answers].sort((a, b) => b.upvotes.length - a.upvotes.length);
 
   return (
-    <div className="app-container">
-      <div className="question-detail-container">
-        
-        {/* --- The Question --- */}
-        <div className="question-post card-style">
-          <span className="topic-badge">{question.topic}</span>
-          <h1>{question.title}</h1>
-          <p className="original-question-text">"{question.originalQuestion}"</p>
-          <div className="question-meta">
-            <span>Asked by {question.user?.name || 'User'}</span>
-            <span>{new Date(question.createdAt).toLocaleDateString()}</span>
+    <Container className="py-5 animate-slide-up">
+      <Row className="justify-content-center">
+        <Col lg={8}>
+          {/* Question Card */}
+          <Card className="border-0 shadow-md mb-4">
+            <Card.Body className="p-4">
+              <div className="d-flex flex-wrap gap-2 mb-3">
+                <Badge bg="primary" className="rounded-pill px-3 py-2">{question.topic}</Badge>
+                {question.tags.map((t, i) => <Badge key={i} bg="light" text="dark" className="border rounded-pill px-3 py-2">{t}</Badge>)}
+              </div>
+              <h2 className="fw-bold mb-3 text-dark">{question.title}</h2>
+              <div className="bg-light p-4 rounded-4 border border-light text-muted fst-italic mb-3">
+                "{question.originalQuestion}"
+              </div>
+              <div className="d-flex align-items-center text-muted small mt-3">
+                <FaUserCircle className="me-2" size={16} />
+                Asked by <span className="fw-bold text-dark mx-1">{question.user?.name || 'User'}</span> • {new Date(question.createdAt).toLocaleDateString()}
+              </div>
+            </Card.Body>
+          </Card>
+
+          <h4 className="fw-bold mb-4">{question.answers.length} Answers</h4>
+
+          {/* Answers */}
+          <div className="d-flex flex-column gap-3 mb-5">
+            {sortedAnswers.map(answer => (
+              <Card key={answer._id} className={`border-0 shadow-sm ${answer.isAIGenerated ? 'border-start border-4 border-success' : ''}`}>
+                <Card.Body className="p-4">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div className="d-flex align-items-center">
+                      {answer.isAIGenerated ? <FaRobot className="text-success me-2" size={20}/> : <FaUserCircle className="text-secondary me-2" size={20}/>}
+                      <div>
+                         <span className="fw-bold d-block">{answer.isAIGenerated ? 'PathFinder AI' : answer.user.name}</span>
+                         <span className="text-muted small" style={{fontSize: '0.75rem'}}>{new Date(answer.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    {answer.isAIGenerated && <Badge bg="success" bg-opacity="10" className="text-success">AI Answer</Badge>}
+                  </div>
+                  
+                  <div className="mb-4">
+                    <ReactMarkdown>{answer.text}</ReactMarkdown>
+                  </div>
+
+                  <Button 
+                    variant={user && answer.upvotes.includes(user._id) ? "primary" : "outline-secondary"}
+                    size="sm"
+                    className="rounded-pill px-3 d-flex align-items-center gap-2"
+                    onClick={() => handleUpvote(answer._id)}
+                  >
+                    <FaArrowUp /> {answer.upvotes.length} Upvotes
+                  </Button>
+                </Card.Body>
+              </Card>
+            ))}
           </div>
-        </div>
 
-        {/* --- The Answers --- */}
-        <div className="answers-list">
-          <h2>{question.answers.length} Answers</h2>
-          {sortedAnswers.map(answer => (
-            <div key={answer._id} className="answer-item card-style">
-              <div className="answer-meta">
-                <span className="answer-author">{answer.isAIGenerated ? 'PathFinder AI' : answer.user.name}</span>
-                {answer.isAIGenerated && <span className="ai-badge">AI Answer</span>}
-              </div>
-              <ReactMarkdown>{answer.text}</ReactMarkdown>
-              <div className="answer-actions">
-                <button 
-                  className="upvote-btn" 
-                  onClick={() => handleUpvote(answer._id)}
-                  // Style button if user has already upvoted
-                  style={user && answer.upvotes.includes(user._id) ? {backgroundColor: 'var(--accent-color)', color: '#fff'} : {}}
-                >
-                  ▲ Upvote ({answer.upvotes.length})
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* --- Add Answer Form --- */}
-        {user ? (
-          <form onSubmit={handleAddAnswer} className="answer-form card-style">
-            <h2>Your Answer</h2>
-            <div className="form-group">
-              <textarea 
-                rows="6"
-                placeholder="Share your knowledge..."
-                value={newAnswer}
-                onChange={(e) => setNewAnswer(e.target.value)}
-              ></textarea>
-            </div>
-            <button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Posting...' : 'Post Answer'}
-            </button>
-          </form>
-        ) : (
-          <p>
-            <Link to="/login">Log in</Link> or <Link to="/register">Register</Link> to post an answer.
-          </p>
-        )}
-      </div>
-    </div>
+          {/* Answer Form */}
+          {user ? (
+            <Card className="border-0 shadow-sm card-hover">
+              <Card.Body className="p-4">
+                <h5 className="fw-bold mb-3">Your Answer</h5>
+                <Form onSubmit={handleAddAnswer}>
+                  <Form.Group className="mb-3">
+                    <Form.Control 
+                      as="textarea" 
+                      rows={5} 
+                      placeholder="Share your knowledge..."
+                      value={newAnswer}
+                      onChange={(e) => setNewAnswer(e.target.value)}
+                      className="bg-light border-0 p-3"
+                    />
+                  </Form.Group>
+                  <Button type="submit" disabled={isSubmitting} variant="primary" className="rounded-pill px-4">
+                    {isSubmitting ? 'Posting...' : 'Post Answer'}
+                  </Button>
+                </Form>
+              </Card.Body>
+            </Card>
+          ) : (
+            <Alert variant="info" className="text-center border-0 shadow-sm py-4">
+              <Link to="/login" className="fw-bold text-decoration-none">Log in</Link> to join the discussion.
+            </Alert>
+          )}
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

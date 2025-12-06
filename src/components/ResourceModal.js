@@ -1,53 +1,102 @@
-import React from 'react';
+import React, { memo } from 'react';
+import { Modal, ListGroup, Button, Badge } from 'react-bootstrap';
+import { FaExternalLinkAlt, FaSearch } from 'react-icons/fa';
 
-// Re-using the same loader from your dashboard
-const Loader = () => (
-  <div className="loader-container">
-    <div className="loader-dots">
-      <span className="dot"></span>
-      <span className="dot"></span>
-      <span className="dot"></span>
-    </div>
-    <p className="loader-text">Finding best resources...</p>
+/**
+ * Renders a single resource list item.
+ */
+const ResourceItem = memo(({ resource }) => {
+  // Extract hostname for cleaner display
+  const getHostname = (url) => {
+    try {
+      return new URL(url).hostname.replace('www.', '');
+    } catch {
+      return 'Unknown Source';
+    }
+  };
+
+  return (
+    <ListGroup.Item className="mb-3 border-0 rounded-4 shadow-sm p-4 glass-card feature-card" style={{ transition: 'all 0.2s' }}>
+      <a
+        href={resource.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-decoration-none"
+      >
+        <div className="d-flex justify-content-between align-items-start">
+          <h6 className="fw-bold mb-1 text-main">{resource.title}</h6>
+          <FaExternalLinkAlt size={12} className="text-muted mt-1" />
+        </div>
+        <p className="text-muted small mb-0 text-truncate" style={{ maxWidth: '95%' }}>
+          {resource.snippet}
+        </p>
+        <Badge bg="light" text="dark" className="mt-2 border fw-normal px-2 py-1 rounded-pill">
+          {getHostname(resource.url)}
+        </Badge>
+      </a>
+    </ListGroup.Item>
+  );
+});
+
+/**
+ * Displayed when resources are loading.
+ */
+const LoadingView = () => (
+  <div className="text-center py-5">
+    <div className="spinner-border text-primary mb-3" role="status"></div>
+    <p className="text-muted animate-pulse">Scouring the web for the best tutorials...</p>
   </div>
 );
 
-const ResourceModal = ({ isOpen, onClose, isLoading, concept, resources }) => {
-  if (!isOpen) {
-    return null;
-  }
+/**
+ * Displayed when no resources are found.
+ */
+const EmptyView = () => (
+  <div className="text-center py-5 text-muted">
+    <FaSearch size={40} className="mb-3 opacity-25" />
+    <p>No specific resources found. Try searching generally.</p>
+  </div>
+);
 
+/**
+ * Modal to display fetched resources for a concept.
+ */
+const ResourceModal = ({ isOpen, onClose, isLoading, concept, resources }) => {
   return (
-    // The modal overlay
-    <div className="modal-overlay" onClick={onClose}>
-      {/* The modal content
-          We use stopPropagation to prevent clicks inside
-          the modal from closing it.
-      */}
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close-button" onClick={onClose}>×</button>
-        <h2>Resources for: {concept}</h2>
-        
+    <Modal
+      show={isOpen}
+      onHide={onClose}
+      centered
+      size="lg"
+      backdrop="static"
+      keyboard={true}
+    >
+      <Modal.Header closeButton className="border-bottom-0 pb-0">
+        <Modal.Title className="fw-bold">
+          Resources for: <span className="text-gradient">{concept}</span>
+        </Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body className="p-4">
         {isLoading ? (
-          <Loader />
+          <LoadingView />
+        ) : resources.length > 0 ? (
+          <ListGroup variant="flush">
+            {resources.map((resource, index) => (
+              <ResourceItem key={index} resource={resource} />
+            ))}
+          </ListGroup>
         ) : (
-          <ul className="resource-list">
-            {resources.length > 0 ? (
-              resources.map((resource, index) => (
-                <li key={index} className="resource-item">
-                  <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                    {resource.title}
-                  </a>
-                  <p>{resource.snippet}</p>
-                </li>
-              ))
-            ) : (
-              <p>No resources found for this concept.</p>
-            )}
-          </ul>
+          <EmptyView />
         )}
-      </div>
-    </div>
+      </Modal.Body>
+
+      <Modal.Footer className="border-top-0">
+        <Button variant="secondary" onClick={onClose}>
+          Close
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 };
 

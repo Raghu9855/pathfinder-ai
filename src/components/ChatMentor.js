@@ -1,127 +1,118 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { Form, Button, Spinner, Card } from 'react-bootstrap';
+import { FaPaperPlane, FaRobot } from 'react-icons/fa';
 
-const ChatMentor = ({ roadmapData }) => {
-  const [messages, setMessages] = useState([]);
-  const [userInput, setUserInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // Used for chat responses
-  const messageDisplayRef = useRef(null);
+// --- Constants ---
+import useChatMentor from '../hooks/useChatMentor';
 
-  // This useEffect now runs ONCE when the component is created
-  // (or re-created by the 'key' prop in MentorPage)
-  useEffect(() => {
-    const loadChatHistory = async () => {
-      setIsLoading(true);
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/api/chat/${roadmapData._id}`, 
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
+// --- Constants ---
+const STYLES = {
+  headerIcon: { width: 45, height: 45 },
+  headerText: { maxWidth: '200px' },
+  card: { minHeight: '500px', maxHeight: '75vh' },
+  inputShadow: { boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.03)' },
+  sendBtn: { textDecoration: 'none', zIndex: 5 }
+};
 
-        if (!response.ok) {
-          throw new Error('Failed to load chat history.');
-        }
 
-        const history = await response.json();
 
-        // If history is empty, add the welcome message.
-        if (history.length === 0) {
-          setMessages([
-            { sender: 'ai', text: `Hello! I'm your AI mentor. How can I help you with your roadmap for **${roadmapData.roadmap.title}**?` }
-          ]);
-        } else {
-          setMessages(history);
-        }
+// --- Sub-Components ---
 
-      } catch (error) {
-        console.error("Error loading chat:", error);
-        setMessages([{ sender: 'ai', text: "Sorry, I couldn't load our previous chat. Let's start over." }]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadChatHistory();
-  }, [roadmapData]); // This runs when the component mounts
+const ChatHeader = memo(({ topic }) => (
+  <div className="p-3 border-bottom bg-transparent d-flex align-items-center shadow-sm" style={{ zIndex: 10 }}>
+    <div className="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style={STYLES.headerIcon}>
+      <FaRobot size={24} />
+    </div>
+    <div className="overflow-hidden">
+      <h6 className="mb-0 fw-bold text-dark text-truncate">AI Mentor</h6>
+      <small className="text-muted text-truncate d-block" style={STYLES.headerText}>{topic}</small>
+    </div>
+  </div>
+));
 
-  // Automatically scroll to the bottom when new messages are added
-  useEffect(() => {
-    if (messageDisplayRef.current) {
-      const { scrollHeight } = messageDisplayRef.current;
-      messageDisplayRef.current.scrollTo(0, scrollHeight);
-    }
-  }, [messages, isLoading]);
+const ChatMessage = memo(({ sender, text }) => (
+  <div className={`d-flex mb-3 ${sender === 'user' ? 'justify-content-end' : 'justify-content-start'}`}>
+    <div className={`message ${sender} shadow-sm`}>
+      <ReactMarkdown>{text}</ReactMarkdown>
+    </div>
+  </div>
+));
 
-  const handleSubmit = async (e) => {
+const LoadingIndicator = () => (
+  <div className="d-flex justify-content-start mb-3">
+    <div className="message ai shadow-sm">
+      <div className="typing-indicator"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+);
+
+const ChatInput = memo(({ onSend, disabled }) => {
+  const [input, setInput] = useState('');
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (!userInput.trim()) return;
-
-    const userMessage = { sender: 'user', text: userInput };
-    // Optimistically update the UI with the user's message
-    setMessages(prev => [...prev, userMessage]);
-    
-    setUserInput('');
-    setIsLoading(true);
-
-    try {
-      const token = localStorage.getItem('token');
-      // Call the NEW POST route
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/chat/${roadmapData._id}`, 
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          // We only need to send the new question!
-          body: JSON.stringify({ userQuestion: userInput }),
-        }
-      );
-
-      const aiMessage = await response.json(); // The server sends back *only* the new AI message
-      if (!response.ok) {
-        throw new Error(aiMessage.error || 'Failed to get a response.');
-      }
-      
-      // Add the new AI message to the list
-      setMessages(prev => [...prev, aiMessage]);
-
-    } catch (error) {
-      console.error("Error with mentor chat:", error);
-      setMessages(prev => [...prev, { sender: 'ai', text: "Sorry, I'm having trouble connecting. Please try again." }]);
-    } finally {
-      setIsLoading(false);
-    }
+    onSend(input);
+    setInput('');
   };
 
   return (
-    <div className="chat-mentor-container">
-      {/* This is no longer a <H3> because the page has its own H1.
-        We remove the title to make it a seamless part of the page.
-      */}
-      <div className="message-display" ref={messageDisplayRef}>
-        {messages.map((msg, index) => (
-          <div key={index} className={`message ${msg.sender}`}>
-            <ReactMarkdown>{msg.text}</ReactMarkdown>
-          </div>
-        ))}
-        {isLoading && <div className="message ai typing-indicator"><span></span><span></span><span></span></div>}
-      </div>
-      <form onSubmit={handleSubmit} className="chat-input-form">
-        <input
-          type="text"
-          value={userInput}
-          onChange={(e) => setUserInput(e.target.value)}
-          placeholder="Ask a question or type 'next'..."
-          disabled={isLoading}
-        />
-        <button type="submit" disabled={isLoading}>Send</button>
-      </form>
+    <div className="p-3 bg-transparent border-top">
+      <Form onSubmit={handleSubmit} className="position-relative w-100">
+        <div className="d-flex align-items-center">
+          <Form.Control
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask a follow-up question..."
+            disabled={disabled}
+            className="rounded-pill border-0 bg-light py-2 py-md-3 px-4 pe-5 flex-grow-1"
+            style={STYLES.inputShadow}
+          />
+          <Button
+            type="submit"
+            disabled={disabled || !input.trim()}
+            variant="link"
+            className="position-absolute end-0 top-50 translate-middle-y text-primary pe-3"
+            style={STYLES.sendBtn}
+          >
+            {disabled ? <Spinner animation="border" size="sm" /> : <FaPaperPlane size={20} />}
+          </Button>
+        </div>
+      </Form>
     </div>
+  );
+});
+
+// --- Main Component ---
+
+const ChatMentor = ({ roadmapData }) => {
+  const { messages, isLoading, sendMessage } = useChatMentor(roadmapData);
+  const scrollRef = useRef(null);
+
+  // Auto-scroll effect
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [messages, isLoading]);
+
+  return (
+    <Card className="border-0 shadow-lg overflow-hidden d-flex flex-column h-100 glass-card" style={STYLES.card}>
+      <ChatHeader topic={roadmapData.topic} />
+
+      <div className="flex-grow-1 p-3 p-md-4 message-display bg-transparent" ref={scrollRef}>
+        {messages.map((msg, idx) => (
+          <ChatMessage key={idx} sender={msg.sender} text={msg.text} />
+        ))}
+        {isLoading && <LoadingIndicator />}
+      </div>
+
+      <ChatInput onSend={sendMessage} disabled={isLoading} />
+    </Card>
   );
 };
 

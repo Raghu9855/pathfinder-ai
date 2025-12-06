@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
+import { Container, Row, Col, Card, Badge, Alert, Button } from 'react-bootstrap';
 
-// A simple loader component
 const Loader = () => (
-  <div className="loader-container">
-    <div className="loader-dots">
-      <span className="dot"></span>
-      <span className="dot"></span>
-      <span className="dot"></span>
-    </div>
+  <div className="text-center py-5">
+    <div className="spinner-border text-primary" role="status"></div>
   </div>
 );
 
@@ -16,18 +12,15 @@ const ShareableRoadmapPage = () => {
   const [roadmapData, setRoadmapData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { shareableId } = useParams(); // Get the ID from the URL
+  const { shareableId } = useParams();
 
   useEffect(() => {
     const fetchSharedRoadmap = async () => {
       try {
         setIsLoading(true);
-        // This is our new public API endpoint
         const response = await fetch(`${process.env.REACT_APP_API_URL}/api/roadmap/share/${shareableId}`);
         
-        if (!response.ok) {
-          throw new Error('Roadmap not found or is no longer shared.');
-        }
+        if (!response.ok) throw new Error('Roadmap not found or is no longer shared.');
         
         const data = await response.json();
         setRoadmapData(data);
@@ -39,52 +32,74 @@ const ShareableRoadmapPage = () => {
     };
 
     fetchSharedRoadmap();
-  }, [shareableId]); // Re-run if the ID changes
+  }, [shareableId]);
 
-  if (isLoading) {
-    return <Loader />;
-  }
+  if (isLoading) return <Container className="py-5"><Loader /></Container>;
 
   if (error) {
     return (
-      <div className="app-container">
-        <h1 style={{ textAlign: 'center', color: '#ff4d4d' }}>Error</h1>
-        <p style={{ textAlign: 'center' }}>{error}</p>
-      </div>
+      <Container className="py-5 text-center">
+        <Alert variant="danger" className="d-inline-block px-5 shadow-sm">
+          <h4 className="alert-heading fw-bold">Oops!</h4>
+          <p className="mb-0">{error}</p>
+        </Alert>
+      </Container>
     );
   }
 
-  if (!roadmapData) {
-    return null; // Should be handled by loading/error
-  }
+  if (!roadmapData) return null;
 
   const { roadmap, topic } = roadmapData;
 
   return (
-    <div className="app-container">
-      <div className="shareable-roadmap-container">
-        <h2>{roadmap.title}</h2>
-        <p>A shareable {roadmap.weeks.length}-week roadmap for <strong>{topic}</strong>.</p>
-        
-        <div className="roadmap-container">
-          {roadmap.weeks?.map((week, index) => (
-            <div key={index} className="roadmap-card">
-              <h3>
-                Week {week.week}: {week.focus}
-              </h3>
-              {/* This is a read-only list */}
-              <ul className="concepts-list">
-                {week.concepts.map((concept, conceptIndex) => (
-                  <li key={conceptIndex}>
-                    {concept}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <Container className="py-5 animate-slide-up">
+      <Row className="justify-content-center mb-5">
+        <Col lg={8} className="text-center">
+          <Badge bg="primary" className="mb-3 px-3 py-2 rounded-pill text-uppercase shadow-sm">Public Roadmap</Badge>
+          <h1 className="display-5 fw-extrabold text-gradient mb-3">{roadmap.title}</h1>
+          <p className="lead text-muted">
+            A {roadmap.weeks.length}-week structured learning path for <strong>{topic}</strong>.
+          </p>
+          <Button as={Link} to="/dashboard" variant="outline-primary" size="sm" className="mt-3 px-4 rounded-pill">
+            Create Your Own Roadmap
+          </Button>
+        </Col>
+      </Row>
+      
+      <Row className="justify-content-center">
+        <Col lg={8}>
+          <div className="d-flex flex-column gap-4">
+            {roadmap.weeks?.map((week, index) => (
+              <Card key={index} className="border-0 shadow-sm card-hover">
+                <Card.Body className="p-4">
+                  <div className="d-flex align-items-center mb-3">
+                    <div className="bg-primary bg-opacity-10 text-primary fw-bold rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '42px', height: '42px' }}>
+                      {week.week}
+                    </div>
+                    <h5 className="mb-0 fw-bold">{week.focus}</h5>
+                  </div>
+                  
+                  <div className="ps-5">
+                    <ul className="list-unstyled mb-0">
+                      {week.concepts.map((concept, conceptIndex) => (
+                        <li key={conceptIndex} className="mb-2 d-flex align-items-start text-muted">
+                          <span className="text-success me-2">✔</span>
+                          {concept}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </Card.Body>
+              </Card>
+            ))}
+          </div>
+          
+          <div className="text-center mt-5 pt-4 border-top text-muted small">
+            Generated by <strong>PathFinder AI</strong>
+          </div>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 
