@@ -27,9 +27,11 @@ const AppNavbar = () => {
       <Navbar expand="lg" className="glass-navbar sticky-top">
         <Container>
           {/* Brand */}
-          <Navbar.Brand as={Link} to={logoLink} className="brand-logo" onClick={closeMenu}>
-            {/* You can add an icon here if you want, e.g. <FaCompass /> */}
-            <span className="text-gradient">PathFinder AI</span>
+          <Navbar.Brand as={Link} to={logoLink} className="brand-logo d-flex align-items-center gap-2" onClick={closeMenu}>
+            <div className="bg-gradient-primary rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', background: 'var(--primary-gradient)' }}>
+              <i className="bi bi-compass-fill text-white fs-4"></i>
+            </div>
+            <span className="text-gradient fw-extrabold fs-4" style={{ letterSpacing: '-0.5px' }}>PathFinder AI</span>
           </Navbar.Brand>
 
           {/* Desktop Actions (Right Side) */}
