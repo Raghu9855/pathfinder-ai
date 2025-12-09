@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import Question from '../models/question.js';
-import Answer from '../models/answer.js';
+import Question from '../models/Question.js';
+import Answer from '../models/Answer.js';
 import { configDotenv } from 'dotenv';
 
 configDotenv();

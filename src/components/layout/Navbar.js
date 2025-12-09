@@ -1,8 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Navbar, Nav, Container, Button, Offcanvas } from 'react-bootstrap';
-import { AuthContext } from '../context/AuthContext';
-import ThemeToggle from '../components/ThemeToggle';
+import { AuthContext } from '../../context/AuthContext';
+import ThemeToggle from '../common/ThemeToggle';
 import { FaSignOutAlt, FaUserCircle, FaBars } from 'react-icons/fa';
 
 const AppNavbar = () => {

@@ -2,19 +2,19 @@ import React from "react";
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import Layout from './Layout';
-import RegisterPage from "../pages/RegisterPage";
-import LoginPage from "../pages/LoginPage";
-import DashboardPage from "../pages/DashboardPage";
-import MyRoadmapsPage from "../pages/MyRoadmapsPage";
-import LeaderboardPage from "../pages/LeaderboardPage";
-import MentorPage from "../pages/MentorPage";
-import ShareableRoadmapPage from "../pages/ShareableRoadmapPage";
-import IndexPage from "../pages/IndexPage";
-import QAPage from "../pages/QAPage";
-import QuestionDetailPage from "../pages/QuestionDetailPage";
-import { AuthProvider } from '../context/AuthContext';
-import ProtectedRoute from './ProtectedRoute';
+import Layout from './components/layout/Layout';
+import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage";
+import DashboardPage from "./pages/DashboardPage";
+import MyRoadmapsPage from "./pages/MyRoadmapsPage";
+import LeaderboardPage from "./pages/LeaderboardPage";
+import MentorPage from "./pages/MentorPage";
+import ShareableRoadmapPage from "./pages/ShareableRoadmapPage";
+import IndexPage from "./pages/IndexPage";
+import QAPage from "./pages/QAPage";
+import QuestionDetailPage from "./pages/QuestionDetailPage";
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/features/auth/ProtectedRoute';
 
 function App() {
   return (

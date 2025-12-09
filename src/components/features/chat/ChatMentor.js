@@ -4,7 +4,7 @@ import { Form, Button, Spinner, Card } from 'react-bootstrap';
 import { FaPaperPlane, FaRobot } from 'react-icons/fa';
 
 // --- Constants ---
-import useChatMentor from '../hooks/useChatMentor';
+import useChatMentor from '../../../hooks/useChatMentor';
 
 // --- Constants ---
 const STYLES = {

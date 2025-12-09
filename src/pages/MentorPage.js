@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import ChatMentor from '../components/ChatMentor';
+import ChatMentor from '../components/features/chat/ChatMentor';
 import { Container, Row, Col, Form, Card, Alert } from 'react-bootstrap';
 
 const MentorPage = () => {
@@ -63,9 +63,9 @@ const MentorPage = () => {
               ) : myRoadmaps.length > 0 ? (
                 <Form.Group controlId="roadmapSelect">
                   <Form.Label className="fw-bold small text-uppercase text-muted mb-2">Select Active Roadmap</Form.Label>
-                  <Form.Select 
-                    size="lg" 
-                    onChange={handleRoadmapChange} 
+                  <Form.Select
+                    size="lg"
+                    onChange={handleRoadmapChange}
                     defaultValue=""
                     className="shadow-sm border-0 bg-light"
                   >
@@ -78,9 +78,9 @@ const MentorPage = () => {
                   </Form.Select>
                 </Form.Group>
               ) : (
-                 <Alert variant="info" className="text-center m-0">
-                   You need to generate a roadmap first! Go to Dashboard.
-                 </Alert>
+                <Alert variant="info" className="text-center m-0">
+                  You need to generate a roadmap first! Go to Dashboard.
+                </Alert>
               )}
             </Card.Body>
           </Card>
@@ -90,12 +90,12 @@ const MentorPage = () => {
               <ChatMentor key={activeRoadmap._id} roadmapData={activeRoadmap} />
             </div>
           ) : (
-             !isLoading && myRoadmaps.length > 0 && (
+            !isLoading && myRoadmaps.length > 0 && (
               <div className="text-center py-5 text-muted opacity-50">
                 <i className="bi bi-chat-dots display-1 mb-3 d-block"></i>
                 <p>Select a roadmap above to start the conversation.</p>
               </div>
-             )
+            )
           )}
         </Col>
       </Row>

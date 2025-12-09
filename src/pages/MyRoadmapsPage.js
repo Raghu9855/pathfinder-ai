@@ -4,9 +4,9 @@ import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaArrowLeft, FaBookOpen } from 'react-icons/fa';
 
-import RoadmapDisplay from '../components/RoadmapDisplay';
-import ResourceModal from '../components/ResourceModal';
-import RoadmapCard from '../components/RoadmapCard';
+import RoadmapDisplay from '../components/features/roadmap/RoadmapDisplay';
+import ResourceModal from '../components/features/roadmap/ResourceModal';
+import RoadmapCard from '../components/features/roadmap/RoadmapCard';
 import { useRoadmaps } from '../hooks/useRoadmaps';
 
 const MyRoadmapsPage = () => {

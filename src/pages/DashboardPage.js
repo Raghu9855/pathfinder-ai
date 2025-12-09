@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import SearchInput from '../components/SearchInput';
-import RoadmapDisplay from '../components/RoadmapDisplay';
+import SearchInput from '../components/features/roadmap/SearchInput';
+import RoadmapDisplay from '../components/features/roadmap/RoadmapDisplay';
 import { Container, Row, Col, Alert } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 
