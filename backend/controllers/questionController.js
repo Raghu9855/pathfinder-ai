@@ -1,14 +1,10 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import Question from '../models/Question.js';
 import Answer from '../models/Answer.js';
 import dotenv from 'dotenv';
+import { elaborateQuestion } from '../services/aiService.js';
 import { extractJSON } from '../utils/helpers.js';
 
 dotenv.config();
-if (!process.env.GEMINI_API_KEY) {
-  console.error("CRITICAL ERROR: GEMINI_API_KEY is not set in environment variables!");
-}
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 /**
  * @desc    Create a new AI-moderated question
@@ -24,43 +20,28 @@ const createQuestion = async (req, res) => {
   }
 
   try {
-    // 1. Call AI to pre-process the question (Use JSON Mode)
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
-      generationConfig: { responseMimeType: "application/json" }
-    });
+    // 1. Call AI Service to pre-process the question
+    // This now delegates to aiService.js which handles the SDK logic and fallbacks
+    const aiResponse = await elaborateQuestion(originalQuestion, topic);
 
-    const prompt = `
-      You are an expert technical editor. A user has submitted the following question about "${topic}":
-      "${originalQuestion}"
-      
-      1. Suggest a clean, concise title for this question.
-      2. Identify 3-5 relevant keywords or tags.
-      3. Provide a basic, helpful, AI-generated answer to get the conversation started.
-
-      Respond with a JSON object containing keys: "title", "tags", "ai_answer".
-    `;
-
-    const result = await model.generateContent(prompt);
-    const aiResponse = extractJSON(await result.response.text());
-
-    if (!aiResponse || !aiResponse.title || !aiResponse.ai_answer) {
-      throw new Error('Failed to get valid response from AI moderator.');
-    }
+    // Fallbacks just in case elaborateQuestion somehow returns null (though it has its own fallback)
+    const title = aiResponse?.title || originalQuestion.substring(0, 50);
+    const tags = aiResponse?.tags || [topic];
+    const aiAnswerText = aiResponse?.ai_answer || "I am unable to provide an AI answer at this time.";
 
     // 2. Create the new Question document
     const question = await Question.create({
       user: userId,
       topic: topic.toLowerCase(),
       originalQuestion,
-      title: aiResponse.title,
-      tags: aiResponse.tags || [],
+      title: title,
+      tags: tags,
     });
 
 
     // 3. Create the initial AI-generated Answer
     const aiAnswer = await Answer.create({
-      text: aiResponse.ai_answer,
+      text: aiAnswerText,
       question: question._id,
       user: userId, // Attribute the AI answer to the user who asked
       isAIGenerated: true,
