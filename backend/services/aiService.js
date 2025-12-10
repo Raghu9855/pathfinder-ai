@@ -60,27 +60,48 @@ export const getMentorResponse = async (contextPrompt) => {
         console.log("DEBUG: Raw Gemini Chat Response:", await response.text());
         return await response.text();
     } catch (error) {
-        console.error("AI Service Chat Error:", error);
+        console.error("AI Service Chat Error detailed:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
         return "I apologize, but I'm having trouble connecting to my AI services right now. Please try again in a moment.";
     }
 };
 
 export const generateSearchQuery = async (concept, topic) => {
     const queryGenPrompt = `
-    Generate ONE Google search query for learning ${concept} in ${topic}, for beginners.
-    Include words like "tutorial", "for beginners", or "explained".
-    Return ONLY the search query text, nothing else.
+    Generate ONE Google search query for learning "${concept}" in the context of "${topic}".
+    The query should be optimal for finding beginner-friendly tutorials or documentation.
+    Return ONLY the search query text. Do not use quotation marks around the output.
     `;
-    const result = await model.generateContent(queryGenPrompt);
-    return result?.response?.text ? (await result.response.text()).trim() : null;
+    try {
+        const result = await model.generateContent(queryGenPrompt);
+        const text = (await result.response.text()).trim().replace(/^"|"$/g, ''); // Remove surrounding quotes
+        console.log(`DEBUG: Generated Search Query: [${text}]`);
+        return text;
+    } catch (error) {
+        console.error("Error generating search query:", error);
+        return `${concept} ${topic} tutorial beginner`; // Fallback query
+    }
 };
 
 export const searchGoogle = async (query) => {
-    const response = await customSearch.cse.list({
-        auth: process.env.GOOGLE_SEARCH_API_KEY,
-        cx: process.env.GOOGLE_SEARCH_ENGINE_ID,
-        q: query,
-        num: 3
-    });
-    return response?.data?.items || [];
+    try {
+        console.log(`DEBUG: Executing Google Search with query: [${query}]`);
+        // Check if keys are present
+        if (!process.env.GOOGLE_SEARCH_API_KEY || !process.env.GOOGLE_SEARCH_ENGINE_ID) {
+            console.error("MISSING GOOGLE SEARCH KEYS");
+            return [];
+        }
+
+        const response = await customSearch.cse.list({
+            auth: process.env.GOOGLE_SEARCH_API_KEY,
+            cx: process.env.GOOGLE_SEARCH_ENGINE_ID,
+            q: query,
+            num: 3
+        });
+
+        console.log(`DEBUG: Google Search Items Found: ${response?.data?.items?.length || 0}`);
+        return response?.data?.items || [];
+    } catch (error) {
+        console.error("Error performing Google Search:", error);
+        return [];
+    }
 };
