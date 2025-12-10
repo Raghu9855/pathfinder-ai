@@ -18,6 +18,7 @@ export const validateTopic = async (topic) => {
     const result = await model.generateContent(validationPrompt);
     const response = await result.response;
     const text = await response.text();
+    console.log("DEBUG: Raw Gemini Validation Response:", text); // Debug log
     return text.toLowerCase().trim().includes("yes");
 };
 
@@ -51,12 +52,14 @@ export const generateRoadmapContent = async (topic, week) => {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = await response.text();
+    console.log("DEBUG: Raw Gemini Roadmap Response:", text); // Debug log
     return extractJSON(text);
 };
 
 export const getMentorResponse = async (contextPrompt) => {
     const result = await model.generateContent(contextPrompt);
     const response = await result.response;
+    console.log("DEBUG: Raw Gemini Chat Response:", await response.text()); // Debug log
     return await response.text();
 };
 
