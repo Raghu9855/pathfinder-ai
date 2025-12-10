@@ -11,7 +11,7 @@ if (!process.env.GEMINI_API_KEY) {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const customSearch = google.customsearch('v1');
 
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
 export const validateTopic = async (topic) => {
     const validationPrompt = `Is the topic '${topic}' a technical skill, a scientific concept, an academic subject, or a professional field that can have a structured learning roadmap? Personal names, fictional characters, or general places are not valid topics for this purpose. Please answer with only the word "yes" or "no".`;
@@ -26,7 +26,7 @@ export const validateTopic = async (topic) => {
 export const generateRoadmapContent = async (topic, week) => {
     // specific model instance for JSON mode
     const jsonModel = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-pro",
         generationConfig: { responseMimeType: "application/json" }
     });
 
