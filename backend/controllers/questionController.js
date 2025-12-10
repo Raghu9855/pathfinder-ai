@@ -2,23 +2,13 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Question from '../models/Question.js';
 import Answer from '../models/Answer.js';
 import { configDotenv } from 'dotenv';
+import { extractJSON } from '../utils/helpers.js';
 
 configDotenv();
 if (!process.env.GEMINI_API_KEY) {
   console.error("CRITICAL ERROR: GEMINI_API_KEY is not set in environment variables!");
 }
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// Helper function to extract JSON from the AI's response
-function extractJSON(text) {
-  text = text.replace(/```json|```/g, '').trim();
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    console.error("Failed to parse AI JSON response:", text);
-    return null;
-  }
-}
 
 /**
  * @desc    Create a new AI-moderated question
@@ -34,8 +24,12 @@ const createQuestion = async (req, res) => {
   }
 
   try {
-    // 1. Call AI to pre-process the question
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // 1. Call AI to pre-process the question (Use JSON Mode)
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      generationConfig: { responseMimeType: "application/json" }
+    });
+
     const prompt = `
       You are an expert technical editor. A user has submitted the following question about "${topic}":
       "${originalQuestion}"
@@ -44,8 +38,7 @@ const createQuestion = async (req, res) => {
       2. Identify 3-5 relevant keywords or tags.
       3. Provide a basic, helpful, AI-generated answer to get the conversation started.
 
-      Respond ONLY in a valid JSON format: 
-      {"title": "...", "tags": ["..."], "ai_answer": "..."}
+      Respond with a JSON object containing keys: "title", "tags", "ai_answer".
     `;
 
     const result = await model.generateContent(prompt);
@@ -63,6 +56,7 @@ const createQuestion = async (req, res) => {
       title: aiResponse.title,
       tags: aiResponse.tags || [],
     });
+
 
     // 3. Create the initial AI-generated Answer
     const aiAnswer = await Answer.create({
