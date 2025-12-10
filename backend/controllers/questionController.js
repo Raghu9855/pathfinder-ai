@@ -1,10 +1,10 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import Question from '../models/Question.js';
 import Answer from '../models/Answer.js';
-import { configDotenv } from 'dotenv';
+import dotenv from 'dotenv';
 import { extractJSON } from '../utils/helpers.js';
 
-configDotenv();
+dotenv.config();
 if (!process.env.GEMINI_API_KEY) {
   console.error("CRITICAL ERROR: GEMINI_API_KEY is not set in environment variables!");
 }
@@ -26,7 +26,7 @@ const createQuestion = async (req, res) => {
   try {
     // 1. Call AI to pre-process the question (Use JSON Mode)
     const model = genAI.getGenerativeModel({
-      model: "gemini-pro",
+      model: "gemini-2.0-flash-exp",
       generationConfig: { responseMimeType: "application/json" }
     });
 

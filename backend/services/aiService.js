@@ -1,9 +1,9 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { google } from 'googleapis';
-import { configDotenv } from 'dotenv';
+import dotenv from 'dotenv';
 import { extractJSON } from '../utils/helpers.js';
 
-configDotenv();
+dotenv.config();
 
 if (!process.env.GEMINI_API_KEY) {
     console.error("CRITICAL ERROR: GEMINI_API_KEY is not set in environment variables!");
@@ -11,7 +11,8 @@ if (!process.env.GEMINI_API_KEY) {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const customSearch = google.customsearch('v1');
 
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
 
 export const validateTopic = async (topic) => {
     const validationPrompt = `Is the topic '${topic}' a technical skill, a scientific concept, an academic subject, or a professional field that can have a structured learning roadmap? Personal names, fictional characters, or general places are not valid topics for this purpose. Please answer with only the word "yes" or "no".`;
@@ -19,14 +20,15 @@ export const validateTopic = async (topic) => {
     const response = await result.response;
     const text = await response.text();
     console.log("DEBUG: Raw Gemini Validation Response:", text); // Debug log
-    return text.toLowerCase().trim().includes("yes");
+    const answer = text.toLowerCase().trim();
+    return answer === "yes";
 };
 
 // 1. Generate Roadmap Content (JSON Mode)
 export const generateRoadmapContent = async (topic, week) => {
     // specific model instance for JSON mode
     const jsonModel = genAI.getGenerativeModel({
-        model: "gemini-pro",
+        model: "gemini-2.0-flash-exp",
         generationConfig: { responseMimeType: "application/json" }
     });
 
@@ -45,7 +47,7 @@ export const generateRoadmapContent = async (topic, week) => {
         const response = await result.response;
         const text = await response.text();
         console.log("DEBUG: Raw JSON Roadmap Response:", text);
-        return JSON.parse(text); // No need for extractJSON if using JSON mode, but parsing validation is good
+        return extractJSON(text); // Use extractJSON wrapper for robustness
     } catch (error) {
         console.error("Error generating roadmap content:", error);
         return null;
