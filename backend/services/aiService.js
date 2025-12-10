@@ -22,45 +22,47 @@ export const validateTopic = async (topic) => {
     return text.toLowerCase().trim().includes("yes");
 };
 
+// 1. Generate Roadmap Content (JSON Mode)
 export const generateRoadmapContent = async (topic, week) => {
+    // specific model instance for JSON mode
+    const jsonModel = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        generationConfig: { responseMimeType: "application/json" }
+    });
+
     const prompt = `
         Create a detailed, ${week}-week learning roadmap for a beginner on the topic of '${topic}'.
-        IMPORTANT: If the topic '${topic}' is a person's name, a place, or a concept for which a technical or academic learning roadmap is not possible, your entire response MUST be a JSON object with a single key "error" and a value of "A learning roadmap cannot be created for this topic."
-        Your response MUST be a valid JSON object. Do not include any text or markdown formatting before or after the JSON.
-        The JSON object should have a single key "roadmap" which is an object containing a "title" and a "weeks" array.
-        The "weeks" array MUST contain exactly ${week} object(s). For short durations like 1 or 2 weeks, you MUST consolidate the most important concepts into a single, cohesive plan for each week. Do not create multiple "Week 1" sections.
-        Each object in the "weeks" array should have a "week" number, a "focus" string, and a "concepts" array of strings.
+        
+        IMPORTANT: If the topic '${topic}' is a person's name, a place, or a concept for which a technical or academic learning roadmap is not possible, return a JSON with key "error" and value "Invalid topic".
 
-        Example format:
-        {
-        "roadmap": {
-            "title": "${week}-Week Beginner's Roadmap to ${topic}",
-            "weeks": [
-            {
-                "week": 1,
-                "focus": "Week 1 Main Focus",
-                "concepts": ["Concept A", "Concept B", "Concept C"]
-            },
-            {
-                "week": 2,
-                "focus": "Week 2 Main Focus",
-                "concepts": ["Concept D", "Concept E", "Concept F"]
-            }
-            ]
-        }
-        }`;
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = await response.text();
-    console.log("DEBUG: Raw Gemini Roadmap Response:", text); // Debug log
-    return extractJSON(text);
+        The JSON object should have a single key "roadmap" containing "title" and "weeks".
+        The "weeks" array MUST contain exactly ${week} object(s).
+        Each object in "weeks" should have: "week" (number), "focus" (string), "concepts" (array of strings).
+        `;
+
+    try {
+        const result = await jsonModel.generateContent(prompt);
+        const response = await result.response;
+        const text = await response.text();
+        console.log("DEBUG: Raw JSON Roadmap Response:", text);
+        return JSON.parse(text); // No need for extractJSON if using JSON mode, but parsing validation is good
+    } catch (error) {
+        console.error("Error generating roadmap content:", error);
+        return null;
+    }
 };
 
+// 2. Chat Mentor Response (Robust)
 export const getMentorResponse = async (contextPrompt) => {
-    const result = await model.generateContent(contextPrompt);
-    const response = await result.response;
-    console.log("DEBUG: Raw Gemini Chat Response:", await response.text()); // Debug log
-    return await response.text();
+    try {
+        const result = await model.generateContent(contextPrompt);
+        const response = await result.response;
+        console.log("DEBUG: Raw Gemini Chat Response:", await response.text());
+        return await response.text();
+    } catch (error) {
+        console.error("AI Service Chat Error:", error);
+        return "I apologize, but I'm having trouble connecting to my AI services right now. Please try again in a moment.";
+    }
 };
 
 export const generateSearchQuery = async (concept, topic) => {
