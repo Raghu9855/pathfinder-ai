@@ -1034,3 +1034,16 @@ body[data-theme='dark'] .btn-primary:hover {
     left: 200%;
   }
 }
+/* --- Search Input Responsive Divider --- */
+.search-input-divider {
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0px;
+}
+
+@media (min-width: 768px) {
+  .search-input-divider {
+    border-bottom: none;
+    border-right: 1px solid var(--border-color);
+    margin-bottom: 0;
+  }
+}
