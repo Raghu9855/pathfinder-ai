@@ -5,10 +5,13 @@ import { extractJSON } from '../utils/helpers.js';
 
 configDotenv();
 
+if (!process.env.GEMINI_API_KEY) {
+    console.error("CRITICAL ERROR: GEMINI_API_KEY is not set in environment variables!");
+}
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const customSearch = google.customsearch('v1');
 
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export const validateTopic = async (topic) => {
     const validationPrompt = `Is the topic '${topic}' a technical skill, a scientific concept, an academic subject, or a professional field that can have a structured learning roadmap? Personal names, fictional characters, or general places are not valid topics for this purpose. Please answer with only the word "yes" or "no".`;

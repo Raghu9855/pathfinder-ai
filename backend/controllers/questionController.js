@@ -4,6 +4,9 @@ import Answer from '../models/Answer.js';
 import { configDotenv } from 'dotenv';
 
 configDotenv();
+if (!process.env.GEMINI_API_KEY) {
+  console.error("CRITICAL ERROR: GEMINI_API_KEY is not set in environment variables!");
+}
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Helper function to extract JSON from the AI's response
@@ -32,7 +35,7 @@ const createQuestion = async (req, res) => {
 
   try {
     // 1. Call AI to pre-process the question
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const prompt = `
       You are an expert technical editor. A user has submitted the following question about "${topic}":
       "${originalQuestion}"
