@@ -2,8 +2,6 @@ import * as roadmapService from '../services/roadmapService.js';
 import * as chatService from '../services/chatService.js';
 import * as aiService from '../services/aiService.js';
 
-// --- ROAMAP MANAGEMENT ---
-
 export const generateRoadmap = async (req, res) => {
   try {
     const { topic, week } = req.body;
@@ -51,8 +49,6 @@ export const updateProgress = async (req, res) => {
   }
 };
 
-// --- CHAT & MENTOR ---
-
 export const getChatSession = async (req, res) => {
   try {
     const messages = await chatService.getHistory(req.params.roadmapId, req.user._id);
@@ -75,17 +71,10 @@ export const postToChatSession = async (req, res) => {
   }
 };
 
-// Deprecated or legacy route
 export const chatWithMentor = async (req, res) => {
-  // This seems to be a stateless version or older version. 
-  // For now, redirecting to a simplified AI response or erroring if not supported.
-  // Ideally this should use the same logic but maybe without saving if that was the intent?
-  // Based on previous code, it looks very similar to postToChatSession but stateless.
-  // I will implement a stateless version using aiService if needed.
+  // Legacy route - prefer postToChatSession
   res.status(404).json({ message: "Please use the chat session endpoint." });
 };
-
-// --- SHARING & COMMUNITY ---
 
 export const createShareableLink = async (req, res) => {
   try {

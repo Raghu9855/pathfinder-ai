@@ -2,19 +2,16 @@ import Roadmap from '../models/Roadmap.js';
 import * as aiService from './aiService.js';
 
 export const createRoadmap = async (userId, topic, week) => {
-    // 1. Validate Topic
     const isValid = await aiService.validateTopic(topic);
     if (!isValid) {
         throw new Error("The provided topic is not valid for a structured learning roadmap.");
     }
 
-    // 2. Generate Content
     const jsonData = await aiService.generateRoadmapContent(topic, week);
     if (!jsonData || !jsonData.roadmap) {
         throw new Error("Failed to generate valid roadmap content.");
     }
 
-    // 3. Save to DB
     const newRoadmap = await Roadmap.create({
         user: userId,
         topic: topic,
@@ -31,7 +28,7 @@ export const getUserRoadmaps = async (userId) => {
 export const deleteRoadmap = async (roadmapId, userId) => {
     const roadmap = await Roadmap.findById(roadmapId);
     if (!roadmap) {
-        throw new Error("Roadmap not found"); // Or custom error
+        throw new Error("Roadmap not found");
     }
     if (roadmap.user.toString() !== userId.toString()) {
         throw new Error("Not authorized");
@@ -102,7 +99,7 @@ export const createShareableLink = async (roadmapId, userId) => {
         return roadmap.shareableId;
     }
 
-    const { nanoid } = await import('nanoid'); // Dynamic import for nanoid 3+ if needed, or just import at top
+    const { nanoid } = await import('nanoid');
     roadmap.shareableId = nanoid(10);
     roadmap.isPublic = true;
     await roadmap.save();
