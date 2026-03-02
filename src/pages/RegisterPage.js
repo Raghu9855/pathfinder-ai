@@ -24,7 +24,7 @@ const RegisterPage = () => {
 
       localStorage.setItem("token", data.token);
       login(data.user);
-      navigate("/");
+      navigate("/dashboard");
     })();
 
     toast.promise(registerPromise, {

@@ -20,16 +20,12 @@ const createQuestion = async (req, res) => {
   }
 
   try {
-    // 1. Call AI Service to pre-process the question
-    // This now delegates to aiService.js which handles the SDK logic and fallbacks
     const aiResponse = await elaborateQuestion(originalQuestion, topic);
 
-    // Fallbacks just in case elaborateQuestion somehow returns null (though it has its own fallback)
     const title = aiResponse?.title || originalQuestion.substring(0, 50);
     const tags = aiResponse?.tags || [topic];
     const aiAnswerText = aiResponse?.ai_answer || "I am unable to provide an AI answer at this time.";
 
-    // 2. Create the new Question document
     const question = await Question.create({
       user: userId,
       topic: topic.toLowerCase(),
@@ -38,8 +34,6 @@ const createQuestion = async (req, res) => {
       tags: tags,
     });
 
-
-    // 3. Create the initial AI-generated Answer
     const aiAnswer = await Answer.create({
       text: aiAnswerText,
       question: question._id,
@@ -47,11 +41,9 @@ const createQuestion = async (req, res) => {
       isAIGenerated: true,
     });
 
-    // 4. Link the AI answer to the question
     question.answers.push(aiAnswer._id);
     await question.save();
 
-    // 5. Populate user details for the new question
     const populatedQuestion = await Question.findById(question._id).populate(
       'user',
       'name'
@@ -129,19 +121,16 @@ const addAnswer = async (req, res) => {
       return res.status(404).json({ message: 'Question not found' });
     }
 
-    // 1. Create the new Answer
     const newAnswer = await Answer.create({
       text,
       question: questionId,
       user: userId,
-      isAIGenerated: false, // This is a human answer
+      isAIGenerated: false,
     });
 
-    // 2. Link it to the Question
     question.answers.push(newAnswer._id);
     await question.save();
 
-    // 3. Populate user data for the frontend
     const populatedAnswer = await Answer.findById(newAnswer._id).populate(
       'user',
       'name'
@@ -169,8 +158,6 @@ const upvoteAnswer = async (req, res) => {
       return res.status(404).json({ message: 'Answer not found' });
     }
 
-    // --- THIS IS THE FIX ---
-    // We must compare the string values of the ObjectIds
     const upvotedIndex = answer.upvotes.findIndex(id => id.toString() === userId.toString());
 
     if (upvotedIndex > -1) {
@@ -182,16 +169,15 @@ const upvoteAnswer = async (req, res) => {
     }
 
     await answer.save();
-    // Re-populate the user data for the answer to get the name
+
     const populatedAnswer = await Answer.findById(answerId).populate('user', 'name');
-    res.status(200).json(populatedAnswer); // Send back the updated, populated answer
+    res.status(200).json(populatedAnswer);
   } catch (error) {
     console.error("Error upvoting answer:", error);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-// Export all our new functions
 export {
   createQuestion,
   getQuestions,
