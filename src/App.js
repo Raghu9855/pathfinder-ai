@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import './App.css';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import ReactGA from "react-ga4";
 
 import Layout from './components/layout/Layout';
 import RegisterPage from "./pages/RegisterPage";
@@ -17,15 +16,16 @@ import QuestionDetailPage from "./pages/QuestionDetailPage";
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/features/auth/ProtectedRoute';
 
-// Initialize Google Analytics
-const TRACKING_ID = "G-CRM5SCCY3X";
-ReactGA.initialize(TRACKING_ID);
-
 function AnalyticsTracker() {
   const location = useLocation();
 
   useEffect(() => {
-    ReactGA.send({ hitType: "pageview", page: location.pathname + location.search });
+    // Check if gtag is defined (it is loaded from index.html)
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'page_view', {
+        page_path: location.pathname + location.search,
+      });
+    }
   }, [location]);
 
   return null;
